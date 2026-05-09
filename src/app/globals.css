@@ -97,10 +97,17 @@
 
 html { scroll-behavior: smooth; }
 
-/* ─── Custom cursor ─────────────────────────────────────── */
-@media (pointer: fine) {
+/* ─── Custom cursor (desktop / trackpad only — niet op touch) ─ */
+@media (pointer: fine) and (hover: hover) {
   body { cursor: none; }
   a, button { cursor: none; }
+}
+
+/* Touch-primary: verberg bol (back-up naast CustomCursor.tsx) */
+@media (pointer: coarse) {
+  #custom-cursor {
+    display: none !important;
+  }
 }
 
 #custom-cursor {
@@ -117,7 +124,9 @@ html { scroll-behavior: smooth; }
   transition: width 0.3s cubic-bezier(0.16,1,0.3,1),
               height 0.3s cubic-bezier(0.16,1,0.3,1);
 }
-#custom-cursor.grow { width: 64px; height: 64px; }
+@media (pointer: fine) and (hover: hover) {
+  #custom-cursor.grow { width: 64px; height: 64px; }
+}
 
 body {
   background: var(--page-bg);

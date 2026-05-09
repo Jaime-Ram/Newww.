@@ -1,11 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+/** Alleen op muis/trackpad-met-hover; niet op telefoons / touch-primary. */
+const CURSOR_MEDIA = "(pointer: fine) and (hover: hover)";
 
 export default function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const [useCustomCursor, setUseCustomCursor] = useState(false);
 
   useEffect(() => {
+    const mq = window.matchMedia(CURSOR_MEDIA);
+    const sync = () => setUseCustomCursor(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!useCustomCursor) return;
+
     const cursor = cursorRef.current;
     if (!cursor) return;
 
@@ -31,8 +45,11 @@ export default function CustomCursor() {
         el.removeEventListener("mouseenter", onEnter);
         el.removeEventListener("mouseleave", onLeave);
       });
+      cursor.classList.remove("grow");
     };
-  }, []);
+  }, [useCustomCursor]);
+
+  if (!useCustomCursor) return null;
 
   return <div ref={cursorRef} id="custom-cursor" />;
 }
