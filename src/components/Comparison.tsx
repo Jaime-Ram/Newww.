@@ -15,7 +15,7 @@ export default function Comparison() {
             <span className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: "var(--accent)" }}>
               {tr.eyebrow}
             </span>
-            <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none" style={{ color: "var(--text)" }}>
+            <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none max-w-full break-words [overflow-wrap:anywhere]" style={{ color: "var(--text)" }}>
               {tr.heading}
             </h2>
           </div>

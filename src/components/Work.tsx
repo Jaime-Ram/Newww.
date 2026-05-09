@@ -16,7 +16,7 @@ const projects = [
   {
     id: 2,
     num: "002",
-    title: { en: "Energiebelastingloket", es: "Energiebelastingloket" },
+    title: { en: "Energiebelastingloket", es: "EBL.nl" },
     category: { en: "Tax Platform", es: "Plataforma Fiscal" },
     tags: ["Backend", "Web Design"],
     year: "2025",
@@ -50,7 +50,7 @@ export default function Work() {
     <section id="work" className="py-24 md:py-32 px-6 md:px-12" style={{ backgroundColor: "var(--page-bg)" }}>
       <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
-          <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none" style={{ color: "var(--text)" }}>
+          <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none max-w-full break-words [overflow-wrap:anywhere]" style={{ color: "var(--text)" }}>
             {tr.heading}
           </h2>
           <a href="#contact" className="work-all-link text-sm font-semibold underline underline-offset-4">
@@ -82,7 +82,7 @@ export default function Work() {
                 </div>
 
                 <div className="relative z-10">
-                  <h3 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-black tracking-tight leading-[1.0] mb-6 text-[#111111] group-hover:text-white transition-colors duration-300">
+                  <h3 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-black tracking-tight leading-[1.0] mb-6 text-[#111111] group-hover:text-white transition-colors duration-300 max-w-full break-words [overflow-wrap:anywhere]">
                     {project.title[lang]}
                   </h3>
                   <div className="flex items-end justify-between gap-4">

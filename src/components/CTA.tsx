@@ -57,7 +57,7 @@ export default function CTA() {
           {/* Left */}
           <div>
             <p className="text-xs font-bold tracking-[0.25em] uppercase mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>{tr.eyebrow}</p>
-            <h2 className="text-white text-[clamp(2.5rem,6vw,6rem)] font-black tracking-tighter leading-[0.9] mb-6">
+            <h2 className="text-white text-[clamp(2.5rem,6vw,6rem)] font-black tracking-tighter leading-[0.9] mb-6 max-w-full break-words [overflow-wrap:anywhere]">
               {tr.heading}
             </h2>
             <p className="text-lg leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.body}</p>

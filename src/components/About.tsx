@@ -18,7 +18,7 @@ export default function About() {
               <span className="w-8 h-px" style={{ backgroundColor: "var(--accent)" }} />
               {tr.eyebrow}
             </span>
-            <h2 className="text-white text-[clamp(2.5rem,5vw,4rem)] font-black tracking-tighter leading-[0.95] mb-8">
+            <h2 className="text-white text-[clamp(2.5rem,5vw,4rem)] font-black tracking-tighter leading-[0.95] mb-8 max-w-full break-words [overflow-wrap:anywhere]">
               {tr.heading}
             </h2>
             <div className="space-y-5 text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>

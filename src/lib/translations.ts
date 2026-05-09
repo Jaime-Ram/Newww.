@@ -73,7 +73,7 @@ const t = {
       cols: { agency: "Traditional Agency", us: "newww." },
       rows: [
         { label: "Delivery time", agency: "3–6 months", us: "2–4 weeks" },
-        { label: "Starting price", agency: "$10,000+", us: "From $500" },
+        { label: "Starting price", agency: "$10,000+", us: "From $499" },
         { label: "Who you talk to", agency: "Account managers", us: "Us, directly" },
         { label: "Communication", agency: "Via project managers", us: "Direct access" },
         { label: "Revisions", agency: "Limited + extra fees", us: "Unlimited" },
@@ -115,7 +115,7 @@ const t = {
       plans: [
         {
           name: "One Pager",
-          price: "$500",
+          price: "$499",
           description: "One clean page to get you online fast. No fluff, just a sharp site that works.",
           delivery: "5-day delivery",
           items: ["Custom design", "Mobile-responsive", "Contact form", "SEO basics", "Handover"],
@@ -172,7 +172,7 @@ const t = {
       sub: "Still have questions? Drop us a message — we're happy to chat.",
       items: [
         { q: "How long does a website project take?", a: "Most projects take 4–8 weeks from kickoff to launch. A simple landing page can be done in 2 weeks, while larger e-commerce or web app projects may take 10–12 weeks. We'll give you a clear timeline upfront." },
-        { q: "How much does a website cost?", a: "A one pager starts at $500 and a complete website with branding at $999. For custom software or bigger builds, we scope it together and give you a fixed price — no surprises." },
+        { q: "How much does a website cost?", a: "A one pager starts at $499 and a complete website with branding at $999. For custom software or bigger builds, we scope it together and give you a fixed price — no surprises." },
         { q: "Do you work with clients outside the UK?", a: "Absolutely. We work with clients across Europe, North America, and beyond. Our process is fully remote — we collaborate over Figma, Notion, and video calls." },
         { q: "Will I be able to update the website myself?", a: "Yes. We build on CMS platforms like Sanity, Contentful, or WordPress so you can update content without touching code. We provide training and documentation on handover." },
         { q: "Do you offer maintenance after launch?", a: "Yes — we offer monthly retainer packages covering updates, performance monitoring, and priority support. Many clients keep us on retainer long after launch." },
@@ -211,8 +211,8 @@ const t = {
     },
     hero: {
       eyebrow: "Building websites since 2022",
-      h1_1: "Construimos",
-      h1_2: "sitios web",
+      h1_1: "Creamos",
+      h1_2: "sitios",
       h1_3: "que ganan.",
       body: "newww. es una agencia web joven y reactiva. Construimos rápido, simple, y sin vueltas. Tu sitio live en semanas — sin dramas, sin esperas.",
       cta1: "Ver nuestro trabajo",
@@ -226,7 +226,7 @@ const t = {
       "Integración CMS", "Animaciones Web",
     ],
     work: {
-      heading: "Trabajo seleccionado",
+      heading: "Casos destacados",
       all: "Empezá un proyecto →",
       filters: ["Todos", "Diseño Web", "Desarrollo", "Branding", "E-commerce"],
     },
@@ -268,11 +268,11 @@ const t = {
     },
     comparison: {
       eyebrow: "Por qué newww.",
-      heading: "La elección más inteligente.",
+      heading: "La opción más clara.",
       cols: { agency: "Agencia Tradicional", us: "newww." },
       rows: [
         { label: "Tiempo de entrega", agency: "3–6 meses", us: "2–4 semanas" },
-        { label: "Precio inicial", agency: "$10.000+", us: "Desde $500" },
+        { label: "Precio inicial", agency: "$10.000+", us: "Desde $499" },
         { label: "Con quién hablás", agency: "Account managers", us: "Nosotros, directo" },
         { label: "Comunicación", agency: "Por project managers", us: "Acceso directo" },
         { label: "Revisiones", agency: "Limitadas + costo extra", us: "Ilimitadas" },
@@ -281,7 +281,7 @@ const t = {
     },
     deliverables: {
       eyebrow: "Qué incluye",
-      heading: "Todo lo que necesitás para ganar online.",
+      heading: "Lo esencial para ganar online.",
       sub: "Cada proyecto incluye nuestro stack completo — diseño, desarrollo y soporte de lanzamiento. Sin extras, sin sorpresas.",
       items: [
         { title: "Diseño personalizado en Figma", desc: "3 conceptos únicos creados alrededor de tu marca y objetivos." },
@@ -314,7 +314,7 @@ const t = {
       plans: [
         {
           name: "One Pager",
-          price: "$500",
+          price: "$499",
           description: "Una página limpia para estar online rápido. Sin vueltas, solo un sitio que funciona.",
           delivery: "Entrega en 5 días",
           items: ["Diseño personalizado", "Responsive", "Formulario de contacto", "SEO básico", "Entrega de archivos"],
@@ -371,7 +371,7 @@ const t = {
       sub: "¿Tenés más dudas? Mandanos un mensaje — con gusto te respondemos.",
       items: [
         { q: "¿Cuánto tarda un proyecto de sitio web?", a: "La mayoría de los proyectos toman 4–8 semanas desde el inicio hasta el lanzamiento. Una landing page simple puede estar lista en 2 semanas, mientras que proyectos más grandes pueden tomar 10–12 semanas." },
-        { q: "¿Cuánto cuesta un sitio web?", a: "Los proyectos empiezan desde $3.000 para una landing page y $7.500+ para un sitio completo. Ofrecemos precios fijos y planes de retención. Después de una llamada inicial, te enviamos una propuesta detallada sin sorpresas." },
+        { q: "¿Cuánto cuesta un sitio web?", a: "Un one pager arranca desde $499 y un sitio completo con branding desde $999. Para software a medida o proyectos grandes, lo definimos juntos con precio fijo — sin sorpresas." },
         { q: "¿Trabajan con clientes fuera del Reino Unido?", a: "¡Claro que sí! Trabajamos con clientes en toda Europa, América del Norte y más allá. Nuestro proceso es 100% remoto." },
         { q: "¿Voy a poder actualizar el sitio yo mismo?", a: "Sí. Construimos sobre plataformas CMS como Sanity, Contentful o WordPress para que puedas actualizar contenido sin tocar código." },
         { q: "¿Ofrecen mantenimiento después del lanzamiento?", a: "Sí — ofrecemos planes mensuales que incluyen actualizaciones, monitoreo de performance y soporte prioritario." },
@@ -380,7 +380,7 @@ const t = {
     },
     cta: {
       eyebrow: "¿Listo para empezar?",
-      heading: "Construyamos algo increíble.",
+      heading: "Construyamos juntos.",
       body: "Mandanos un mensaje y te respondemos dentro de un día hábil. Sin compromisos, sin pitch decks — solo una charla.",
       email: "jaimeram8@gmail.com",
       call: "Agendá una llamada gratuita ↗",

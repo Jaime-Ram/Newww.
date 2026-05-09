@@ -19,7 +19,7 @@ export default function Hero() {
             <span className="w-8 h-px" />
             {tr.eyebrow}
           </span>
-          <h1 className="text-[clamp(4.5rem,12vw,10rem)] font-black leading-[0.88] tracking-tighter" style={{ color: "var(--text)" }}>
+          <h1 className="text-[clamp(4.5rem,12vw,10rem)] font-black leading-[0.88] tracking-tighter max-w-full break-words [overflow-wrap:anywhere]" style={{ color: "var(--text)" }}>
             {tr.h1_1}<br />
             <span style={{ color: "var(--accent)" }}>{tr.h1_2}</span><br />
             {tr.h1_3}

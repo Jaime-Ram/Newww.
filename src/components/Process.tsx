@@ -11,7 +11,7 @@ export default function Process() {
     <section className="py-24 md:py-32 px-6 md:px-12" style={{ backgroundColor: "var(--page-bg)" }}>
       <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none" style={{ color: "var(--text)" }}>
+          <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter leading-none max-w-full break-words [overflow-wrap:anywhere]" style={{ color: "var(--text)" }}>
             {tr.heading}
           </h2>
           <p className="text-sm max-w-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{tr.sub}</p>
