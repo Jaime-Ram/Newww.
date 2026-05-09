@@ -49,7 +49,7 @@ export default function Footer() {
           <div>
             <span className="text-white/20 text-xs font-bold tracking-widest uppercase mb-5 block">{tr.contact}</span>
             <div className="flex flex-col gap-3">
-              <a href="mailto:jaimeram8@gmail.com" className="footer-link text-sm">jaimeram8@gmail.com</a>
+              <a href="#contact" className="footer-link text-sm">{tr.contactFormLink}</a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-link text-sm">Instagram</a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-link text-sm">LinkedIn</a>
             </div>

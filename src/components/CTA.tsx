@@ -60,10 +60,8 @@ export default function CTA() {
             <h2 className="text-white text-[clamp(2.5rem,6vw,6rem)] font-black tracking-tighter leading-[0.9] mb-6 max-w-full break-words [overflow-wrap:anywhere]">
               {tr.heading}
             </h2>
-            <p className="text-lg leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.body}</p>
-            <a href={`mailto:${tr.email}`} className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
-              {tr.email}
-            </a>
+            <p className="text-lg leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>{tr.body}</p>
+            <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>{tr.formNote}</p>
           </div>
 
           {/* Right */}
