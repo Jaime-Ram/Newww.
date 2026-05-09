@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-const DEFAULT_TO = "jaimeram8@gmail.com";
+const DEFAULT_TO = "jaime21spam@gmail.com";
 
 function escapeHtml(s: string) {
   return s
