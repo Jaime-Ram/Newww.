@@ -107,8 +107,8 @@ export default function CTA() {
               </p>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 15 }}>
                 {lang === "es"
-                  ? "Te respondemos dentro de un día hábil."
-                  : "We'll get back to you within one business day."}
+                  ? "Te respondemos dentro de un día hábil. ¿No ves el mail? Revisá Spam o Promociones."
+                  : "We'll get back to you within one business day — check Spam/Promotions if you don't see a reply email."}
               </p>
             </div>
           ) : (

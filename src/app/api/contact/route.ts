@@ -1,5 +1,14 @@
+import { setDefaultResultOrder } from "node:dns";
+
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+
+/** Vermindert mislukte SMTP-pogingen naar Gmail vanaf serverless (IPv6/connectiviteit). */
+setDefaultResultOrder("ipv4first");
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 const DEFAULT_TO = "jaimeram8@gmail.com";
 
@@ -11,9 +20,14 @@ function escapeHtml(s: string) {
     .replace(/"/g, "&quot;");
 }
 
+function normalizeGmailPassword(raw: string | undefined) {
+  if (!raw) return "";
+  return raw.replace(/\s/g, "").replace(/^["']+|["']+$/g, "");
+}
+
 export async function POST(req: NextRequest) {
   const user = process.env.GMAIL_USER?.trim();
-  const pass = process.env.GMAIL_APP_PASSWORD?.trim();
+  const pass = normalizeGmailPassword(process.env.GMAIL_APP_PASSWORD);
   const to = process.env.CONTACT_TO_EMAIL?.trim() || DEFAULT_TO;
 
   if (!user || !pass) {
@@ -24,7 +38,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { name?: string; email?: string; phone?: string; address?: string; message?: string };
+  let body: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    message?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -43,13 +63,17 @@ export async function POST(req: NextRequest) {
   const safeAddress = address ? escapeHtml(address) : "";
   const safeMessage = message ? escapeHtml(message) : "";
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user,
-      pass,
-    },
-  });
+  const textLines = [
+    `Contactformulier newww.website`,
+    ``,
+    `Naam / Name: ${name}`,
+    `E-mail: ${email}`,
+    phone ? `Telefoon: ${phone}` : null,
+    address ? `Adres / bedrijf: ${address}` : null,
+    message ? `\nBericht:\n${message}` : null,
+  ].filter(Boolean) as string[];
+
+  const textBody = textLines.join("\n");
 
   const html = `
     <div style="font-family: system-ui, sans-serif; max-width: 560px; margin: 0 auto;">
@@ -90,16 +114,37 @@ export async function POST(req: NextRequest) {
     </div>
   `;
 
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+    connectionTimeout: 20_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 25_000,
+  });
+
   try {
     await transporter.sendMail({
       from: `"newww.website" <${user}>`,
       to,
-      subject: `New message from ${name} — newww.website`,
+      subject: `[newww.site] Nieuw formulier · ${name.replace(/\s+/g, " ").slice(0, 60)}`,
+      text: textBody,
       html,
       replyTo: email,
     });
-  } catch (err) {
-    console.error("[contact] sendMail failed:", err);
+    console.info("[contact] Sent ok", { to, from: user });
+  } catch (err: unknown) {
+    const extras =
+      err && typeof err === "object"
+        ? {
+            msg: err instanceof Error ? err.message : null,
+            code: "code" in err ? String((err as { code?: unknown }).code) : null,
+            response:
+              "response" in err ? String((err as { response?: unknown }).response).slice(0, 240) : null,
+          }
+        : {};
+    console.error("[contact] sendMail failed", extras, err);
     return NextResponse.json({ error: "Could not send email." }, { status: 502 });
   }
 
