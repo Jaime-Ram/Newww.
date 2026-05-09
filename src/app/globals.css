@@ -1,26 +1,367 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── Theme: Light (default) ───────────────────────────── */
+:root,
+[data-theme="light"] {
+  --accent:        #FF3D00;
+  --accent-rgb:    255, 61, 0;
+  --page-bg:       #FFFFFF;
+  --dark:          #111111;
+  --dark-rgb:      17, 17, 17;
+  --cta-bg:        #111111;
+  --cta-text:      #FFFFFF;
+  --marquee-bg:    #111111;
+  --border:        #E8E8E8;
+  --text:          #111111;
+  --text-muted:    #888888;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light: hero is white */
+[data-theme="light"] .hero-section {
+  background-color: var(--page-bg) !important;
+}
+[data-theme="light"] .hero-glow { display: none; }
+[data-theme="light"] .hero-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px);
+}
+[data-theme="light"] .hero-section h1 { color: var(--text) !important; }
+[data-theme="light"] .hero-section .hero-body { color: var(--text-muted) !important; }
+[data-theme="light"] .hero-section .hero-eyebrow { color: var(--accent) !important; }
+[data-theme="light"] .hero-section .hero-eyebrow span { background-color: var(--accent) !important; }
+[data-theme="light"] .hero-section .hero-cta-secondary {
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+[data-theme="light"] .hero-section .hero-scroll-indicator { border-color: var(--border) !important; }
+[data-theme="light"] .hero-section .hero-scroll-dot { background-color: var(--text-muted) !important; }
+[data-theme="light"] .hero-section .hero-scroll-label { color: var(--text-muted) !important; }
+
+/* ─── Theme: Bold (V1) ─────────────────────────────────── */
+[data-theme="bold"] {
+  --accent:        #FF3D00;
+  --accent-rgb:    255, 61, 0;
+  --page-bg:       #F7F5F0;
+  --dark:          #0D0D0D;
+  --dark-rgb:      13, 13, 13;
+  --cta-bg:        #FF3D00;
+  --cta-text:      #FFFFFF;
+  --marquee-bg:    #FF3D00;
+  --border:        rgba(13,13,13,0.08);
+  --text:          #0D0D0D;
+  --text-muted:    rgba(13,13,13,0.45);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Theme: Clay (V2) — white/grey/black, no accent color ─ */
+[data-theme="clay"] {
+  --accent:        #111111;
+  --accent-rgb:    17, 17, 17;
+  --page-bg:       #FFFFFF;
+  --dark:          #111111;
+  --dark-rgb:      17, 17, 17;
+  --cta-bg:        #111111;
+  --cta-text:      #FFFFFF;
+  --marquee-bg:    #111111;
+  --border:        #E5E5E5;
+  --text:          #111111;
+  --text-muted:    #888888;
 }
+
+/* Clay: service cards hover → light grey, not dark */
+[data-theme="clay"] .service-card:hover            { background-color: #F5F4F2; }
+[data-theme="clay"] .service-card:hover .service-title { color: #111111; }
+[data-theme="clay"] .service-card:hover .service-desc  { color: #888888; }
+[data-theme="clay"] .service-card:hover .service-tag   { border-color: #E5E5E5; color: #888888; }
+
+/* Hero background — overridable per theme */
+.hero-section { background-color: var(--dark); }
+[data-theme="clay"] .hero-section { background-color: var(--page-bg); }
+
+/* Clay: no hero glow */
+[data-theme="clay"] .hero-glow { display: none; }
+
+/* Clay: hero text */
+[data-theme="clay"] .hero-section              { background-color: var(--page-bg); }
+[data-theme="clay"] .hero-section h1           { color: var(--text) !important; }
+[data-theme="clay"] .hero-section .hero-body   { color: var(--text-muted) !important; }
+[data-theme="clay"] .hero-section .hero-eyebrow { color: var(--accent) !important; }
+[data-theme="clay"] .hero-section .hero-eyebrow span { background-color: var(--accent) !important; }
+[data-theme="clay"] .hero-section .hero-cta-secondary {
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+[data-theme="clay"] .hero-section .hero-scroll-indicator { border-color: var(--border) !important; }
+[data-theme="clay"] .hero-section .hero-scroll-dot       { background-color: var(--text-muted) !important; }
+[data-theme="clay"] .hero-section .hero-scroll-label     { color: var(--text-muted) !important; }
+
+html { scroll-behavior: smooth; }
+
+/* ─── Custom cursor ─────────────────────────────────────── */
+@media (pointer: fine) {
+  body { cursor: none; }
+  a, button { cursor: none; }
+}
+
+#custom-cursor {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.16,1,0.3,1),
+              height 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+#custom-cursor.grow { width: 64px; height: 64px; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
 }
+
+/* ─── Marquee ───────────────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 25s linear infinite; will-change: transform; }
+
+/* ─── Hero grid ─────────────────────────────────────────── */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── Hero buttons ──────────────────────────────────────── */
+.hero-btn-primary {
+  background-color: var(--accent);
+  color: #fff;
+  transition: background-color 0.2s, color 0.2s;
+}
+.hero-btn-primary:hover {
+  background-color: #fff;
+  color: var(--dark);
+}
+
+/* ─── Work grid ─────────────────────────────────────────── */
+.project-card .project-title {
+  color: var(--text);
+  transition: color 0.2s;
+}
+.project-card:hover .project-title { color: var(--accent); }
+
+.project-card .project-overlay {
+  opacity: 0;
+  transition: opacity 0.3s;
+  background-color: rgba(var(--accent-rgb), 0.12);
+}
+.project-card:hover .project-overlay { opacity: 1; }
+
+.project-card .project-cta {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.project-card:hover .project-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Service cards ─────────────────────────────────────── */
+.service-card { background-color: var(--page-bg); transition: background-color 0.3s; }
+.service-card:hover { background-color: var(--dark); }
+
+.service-card .service-title { color: var(--text); transition: color 0.3s; }
+.service-card:hover .service-title { color: #fff; }
+
+.service-card .service-desc { color: var(--text-muted); transition: color 0.3s; }
+.service-card:hover .service-desc { color: rgba(255,255,255,0.4); }
+
+.service-card .service-tag {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: border-color 0.3s, color 0.3s;
+}
+.service-card:hover .service-tag {
+  border-color: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.4);
+}
+
+/* ─── About stat cards ──────────────────────────────────── */
+.stat-card {
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: rgba(var(--accent-rgb), 0.3); }
+
+/* ─── Industry tags ─────────────────────────────────────── */
+.industry-tag {
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.40);
+  transition: border-color 0.2s, color 0.2s;
+}
+.industry-tag:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  color: rgba(255,255,255,0.7);
+}
+
+/* ─── Process steps ─────────────────────────────────────── */
+.step-circle {
+  background-color: var(--page-bg);
+  border: 2px solid var(--accent);
+  transition: background-color 0.2s;
+}
+.step-circle:hover { background-color: var(--accent); }
+
+.step-num {
+  color: var(--accent);
+  transition: color 0.2s;
+}
+.step-circle:hover .step-num { color: #fff; }
+
+/* ─── CTA section ───────────────────────────────────────── */
+.cta-primary-btn {
+  background-color: #fff;
+  transition: background-color 0.2s, color 0.2s;
+}
+.cta-primary-btn:hover {
+  background-color: var(--dark);
+  color: #fff !important;
+}
+
+/* ─── Nav links ─────────────────────────────────────────── */
+.nav-link { transition: color 0.2s; }
+.nav-link:hover { color: var(--accent) !important; }
+
+/* ─── Footer links ──────────────────────────────────────── */
+.footer-link { transition: color 0.2s; color: rgba(255,255,255,0.5); }
+.footer-link:hover { color: #fff; }
+
+/* ─── Work text links ───────────────────────────────────── */
+.work-all-link { color: var(--text-muted); transition: color 0.2s; }
+.work-all-link:hover { color: var(--accent); }
+
+/* ─── FAQ ───────────────────────────────────────────────── */
+.faq-question { color: var(--text); transition: color 0.2s; }
+.faq-question:hover { color: var(--accent); }
+
+/* ─── Filter tabs ───────────────────────────────────────── */
+.filter-tab {
+  padding: 6px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-tab:hover { border-color: var(--text); color: var(--text); }
+.filter-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ─── Comparison table ──────────────────────────────────── */
+.comparison-row { transition: background 0.15s; }
+.comparison-row:hover { background: rgba(0,0,0,0.02); }
+
+/* ─── Testimonial cards ─────────────────────────────────── */
+.testimonial-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  background: #fff;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.testimonial-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.3);
+  transform: translateY(-2px);
+}
+
+/* ─── Pricing cards ─────────────────────────────────────── */
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 32px;
+  background: #fff;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.pricing-card:hover { transform: translateY(-3px); }
+.pricing-card.featured {
+  background: var(--dark);
+  border-color: var(--dark);
+}
+.pricing-card .pricing-item::before {
+  content: "✓";
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.pricing-card.featured .pricing-item::before { color: #fff; }
+
+/* ─── Deliverables grid ─────────────────────────────────── */
+.deliverable-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.deliverable-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.25);
+  background: rgba(var(--accent-rgb), 0.02);
+}
+
+/* ─── Social proof strip ────────────────────────────────── */
+.social-strip { border-top: 1px solid var(--border); }
+
+/* ─── Fuego Pizza — ember particles ────────────────────── */
+@keyframes ember-rise {
+  0%   { opacity: 0.85; transform: translateY(0)     translateX(0)               scale(1);   }
+  60%  { opacity: 0.35; transform: translateY(-55vh)  translateX(var(--ex, 18px)) scale(0.6); }
+  100% { opacity: 0;    transform: translateY(-95vh)  translateX(var(--ex2,28px)) scale(0.2); }
+}
+.fuego-ember { animation: ember-rise var(--dur, 3.2s) ease-out var(--delay, 0s) infinite; }
+
+/* ─── Fuego menu dotted leader ──────────────────────────── */
+.menu-leader {
+  flex: 1;
+  min-width: 12px;
+  border-bottom: 1px dotted rgba(10,6,2,0.25);
+  margin: 0 8px;
+  position: relative;
+  top: -4px;
+}
+
+/* ─── TechFlow grain overlay ────────────────────────────────── */
+.tf-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+  background-repeat: repeat;
+}
+
+/* ─── TechFlow animated gradient background ──────────────────── */
+@keyframes tf-drift {
+  0%, 100% { opacity: 1; transform: scale(1) translate(0,0); }
+  33%       { opacity: 0.7; transform: scale(1.1) translate(-2%, 1%); }
+  66%       { opacity: 0.85; transform: scale(0.95) translate(1%, -1%); }
+}
+.tf-orb { animation: tf-drift 12s ease-in-out infinite; }
+
+/* ─── TechFlow beta dot pulse ─────────────────────────────── */
+@keyframes tf-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50%       { opacity: 0.85; transform: scale(1.1); box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+}
+.tf-pulse-dot { animation: tf-pulse 2s ease-in-out infinite; }
