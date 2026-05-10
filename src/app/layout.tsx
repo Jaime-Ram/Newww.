@@ -14,9 +14,9 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "newww — Web Agency",
+  title: "Newww. — Web Agency",
   description:
-    "newww is a full-service web agency building websites that win. Design-led development for ambitious brands.",
+    "Newww. is a full-service web agency building websites that win. Design-led development for ambitious brands.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "newww — Web Agency",
+    title: "Newww. — Web Agency",
     description: "We build websites that win.",
-    siteName: "newww",
+    siteName: "Newww.",
     url: siteUrl,
   },
 };

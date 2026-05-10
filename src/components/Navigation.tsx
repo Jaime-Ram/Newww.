@@ -39,7 +39,7 @@ export default function Navigation() {
       }`}
       style={scrolled ? { backgroundColor: "var(--page-bg)", borderColor: "var(--border)" } : undefined}
     >
-      <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="newww.">
+      <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Newww.">
         <img
           src="/favicon-mark.png"
           alt=""
