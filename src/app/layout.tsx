@@ -8,9 +8,10 @@ const geist = Geist({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
+/** Canonical URL for OG/favicons; production default avoids wrong deployment host in meta. */
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://newww.website");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,10 +26,25 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
+    type: "website",
     title: "Newww. — Web Agency",
     description: "We build websites that win.",
     siteName: "Newww.",
     url: siteUrl,
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Newww.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Newww. — Web Agency",
+    description: "We build websites that win.",
+    images: ["/og.png"],
   },
 };
 
