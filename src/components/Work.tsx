@@ -29,7 +29,7 @@ const projects = [
     title: { en: "Bondivideo", es: "Bondivideo" },
     category: { en: "Video Production Studio", es: "Estudio de Producción de Video" },
     tags: ["Branding", "Web Design", "App Development"],
-    year: "2025",
+    year: "2026",
     href: "https://bondivideo.app",
   },
   {
@@ -38,7 +38,7 @@ const projects = [
     title: { en: "CSC", es: "CSC" },
     category: { en: "Circular Shipping Company", es: "Circular Shipping Company" },
     tags: ["Web Design", "Development"],
-    year: "2025",
+    year: "2024",
     href: "https://www.circularshipping.nl",
   },
 ];

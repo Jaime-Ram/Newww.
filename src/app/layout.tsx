@@ -18,13 +18,6 @@ export const metadata: Metadata = {
   title: "Newww. — Web Agency",
   description:
     "Newww. is a full-service web agency building websites that win. Design-led development for ambitious brands.",
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
   openGraph: {
     type: "website",
     title: "Newww. — Web Agency",
