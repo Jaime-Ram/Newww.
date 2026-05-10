@@ -3,15 +3,16 @@
 import { useLanguage } from "@/lib/LanguageContext";
 import t from "@/lib/translations";
 
+/** Proudest first (top row); last tile = least prime in typical Z-pattern scan. */
 const projects = [
   {
     id: 1,
     num: "001",
-    title: { en: "CSC", es: "CSC" },
-    category: { en: "Circular Shipping Company", es: "Circular Shipping Company" },
-    tags: ["Web Design", "Development"],
+    title: { en: "Domio", es: "Domio" },
+    category: { en: "Real Estate SaaS", es: "SaaS Inmobiliario" },
+    tags: ["Software", "App Development", "Web Design"],
     year: "2025",
-    href: "https://www.circularshipping.nl",
+    href: "https://domiovastgoedbeheer.nl",
   },
   {
     id: 2,
@@ -25,20 +26,20 @@ const projects = [
   {
     id: 3,
     num: "003",
-    title: { en: "Domio", es: "Domio" },
-    category: { en: "Real Estate SaaS", es: "SaaS Inmobiliario" },
-    tags: ["Software", "App Development", "Web Design"],
-    year: "2025",
-    href: "https://domiovastgoedbeheer.nl",
-  },
-  {
-    id: 4,
-    num: "004",
     title: { en: "Bondivideo", es: "Bondivideo" },
     category: { en: "Video Production Studio", es: "Estudio de Producción de Video" },
     tags: ["Branding", "Web Design", "App Development"],
     year: "2025",
     href: "https://bondivideo.app",
+  },
+  {
+    id: 4,
+    num: "004",
+    title: { en: "CSC", es: "CSC" },
+    category: { en: "Circular Shipping Company", es: "Circular Shipping Company" },
+    tags: ["Web Design", "Development"],
+    year: "2025",
+    href: "https://www.circularshipping.nl",
   },
 ];
 
