@@ -6,7 +6,7 @@ export const size = { width: 32, height: 32 }
 export const contentType = 'image/png'
 
 export default function Icon() {
-  const mark = readFileSync(join(process.cwd(), 'public', 'favicon-mark.png'))
+  const mark = readFileSync(join(process.cwd(), 'public', 'favicon-mark-cropped.png'))
   const src = `data:image/png;base64,${mark.toString('base64')}`
 
   return new ImageResponse(
