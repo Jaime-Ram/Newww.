@@ -1,9 +1,14 @@
 import { ImageResponse } from 'next/og'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
 
 export default function AppleIcon() {
+  const mark = readFileSync(join(process.cwd(), 'public', 'favicon-mark.png'))
+  const src = `data:image/png;base64,${mark.toString('base64')}`
+
   return new ImageResponse(
     (
       <div
@@ -17,29 +22,7 @@ export default function AppleIcon() {
           justifyContent: 'center',
         }}
       >
-        <svg
-          width="140"
-          height="120"
-          viewBox="0 0 22 19"
-          fill="none"
-          style={{ display: 'flex' }}
-        >
-          <path
-            d="M1.5 1.5 L6 17 L10.5 1.5"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M8.5 1.5 L13 17 L17.5 1.5"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="20.5" cy="17" r="2.5" fill="white" />
-        </svg>
+        <img src={src} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
       </div>
     ),
     { ...size }
