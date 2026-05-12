@@ -22,7 +22,7 @@ export default function AppleIcon() {
           justifyContent: 'center',
         }}
       >
-        <img src={src} style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
+        <img src={src} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
       </div>
     ),
     { ...size }
