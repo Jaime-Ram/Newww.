@@ -18,10 +18,12 @@ export default function Pricing() {
             {tr.heading}
           </h2>
           <p className="text-base max-w-md mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>{tr.sub}</p>
-          <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full text-xs font-bold" style={{ backgroundColor: "rgba(var(--accent-rgb),0.08)", color: "var(--accent)" }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent)" }} />
-            {tr.badge}
-          </div>
+          {tr.badge ? (
+            <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full text-xs font-bold" style={{ backgroundColor: "rgba(var(--accent-rgb),0.08)", color: "var(--accent)" }}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent)" }} />
+              {tr.badge}
+            </div>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

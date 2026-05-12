@@ -17,15 +17,24 @@ const projects = [
   {
     id: 2,
     num: "002",
-    title: { en: "Energiebelastingloket", es: "EBL.nl" },
-    category: { en: "Tax Platform", es: "Plataforma Fiscal" },
-    tags: ["Backend", "Web Design"],
+    title: { en: "Vekto Studio", es: "Vekto Studio" },
+    category: { en: "Web Agency", es: "Agencia Web" },
+    tags: ["Branding", "Web Design", "Development"],
     year: "2025",
-    href: "https://energiebelastingloket.nl",
+    href: "/vekto-studio/html/index.html",
   },
   {
     id: 3,
     num: "003",
+    title: { en: "Fintech Demo", es: "Fintech Demo" },
+    category: { en: "Web Design", es: "Diseño Web" },
+    tags: ["Web Design", "Development"],
+    year: "2025",
+    href: "/full2/index.html",
+  },
+  {
+    id: 4,
+    num: "004",
     title: { en: "Bondivideo", es: "Bondivideo" },
     category: { en: "Video Production Studio", es: "Estudio de Producción de Video" },
     tags: ["Branding", "Web Design", "App Development"],
@@ -33,8 +42,17 @@ const projects = [
     href: "https://bondivideo.app",
   },
   {
-    id: 4,
-    num: "004",
+    id: 5,
+    num: "005",
+    title: { en: "Energiebelastingloket", es: "EBL.nl" },
+    category: { en: "Tax Platform", es: "Plataforma Fiscal" },
+    tags: ["Backend", "Web Design"],
+    year: "2025",
+    href: "https://energiebelastingloket.nl",
+  },
+  {
+    id: 6,
+    num: "006",
     title: { en: "CSC", es: "CSC" },
     category: { en: "Circular Shipping Company", es: "Circular Shipping Company" },
     tags: ["Web Design", "Development"],
@@ -107,12 +125,13 @@ export default function Work() {
             const borderRight = oddCol ? { borderRight: "1px solid var(--border)" } : {};
 
             if (project.href) {
+              const isExternal = project.href.startsWith("http");
               return (
                 <a
                   key={project.id}
                   href={project.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={isExternal ? "_blank" : "_self"}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
                   style={borderRight}
                 >
                   {inner}

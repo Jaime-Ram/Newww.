@@ -8,7 +8,7 @@ const t = {
       about: "About",
       contact: "Contact",
       cta: "Start a project",
-      badge: "Only 3 spots left",
+      badge: "",
     },
     hero: {
       eyebrow: "Building websites since 2022",
@@ -109,7 +109,7 @@ const t = {
       eyebrow: "Transparent pricing",
       heading: "Simple, fixed pricing.",
       sub: "No hourly rates, no surprise invoices. Pick a plan and let's build something great.",
-      badge: "Only 3 spots left this month",
+      badge: "",
       guarantee: "100% Money-Back Guarantee",
       mostPopular: "Most popular",
       plans: [
@@ -173,7 +173,7 @@ const t = {
       items: [
         { q: "How long does a website project take?", a: "Most projects take 4–8 weeks from kickoff to launch. A simple landing page can be done in 2 weeks, while larger e-commerce or web app projects may take 10–12 weeks. We'll give you a clear timeline upfront." },
         { q: "How much does a website cost?", a: "A one pager starts at $499 and a complete website with branding at $999. For custom software or bigger builds, we scope it together and give you a fixed price — no surprises." },
-        { q: "Do you work with clients outside the UK?", a: "Absolutely. We work with clients across Europe, North America, and beyond. Our process is fully remote — we collaborate over Figma, Notion, and video calls." },
+        { q: "Do you work with clients internationally?", a: "Absolutely. We're based in the Netherlands and work with clients across Europe, North America, and beyond. Our process is fully remote — we collaborate over Figma, Notion, and video calls." },
         { q: "Will I be able to update the website myself?", a: "Yes. We build on CMS platforms like Sanity, Contentful, or WordPress so you can update content without touching code. We provide training and documentation on handover." },
         { q: "Do you offer maintenance after launch?", a: "Yes — we offer monthly retainer packages covering updates, performance monitoring, and priority support. Many clients keep us on retainer long after launch." },
         { q: "What makes newww. different?", a: "We're young, fast, and direct. No agency layers, no project managers you'll never meet. You talk straight to the people building your site, and we move quicker than any traditional agency." },
@@ -197,7 +197,7 @@ const t = {
       privacy: "Privacy Policy",
       terms: "Terms of Service",
       copy: (y: number) => `© ${y} newww. All rights reserved.`,
-      cities: ["Amsterdam", "London", "Remote worldwide"],
+      cities: ["Amsterdam", "Remote worldwide"],
     },
   },
 
@@ -208,7 +208,7 @@ const t = {
       about: "Nosotros",
       contact: "Contacto",
       cta: "Empezá un proyecto",
-      badge: "Solo 3 lugares disponibles",
+      badge: "",
     },
     hero: {
       eyebrow: "Building websites since 2022",
@@ -309,7 +309,7 @@ const t = {
       eyebrow: "Precios transparentes",
       heading: "Precios simples y fijos.",
       sub: "Sin tarifas por hora, sin facturas sorpresa. Elegí un plan y construyamos algo increíble.",
-      badge: "Solo 3 lugares este mes",
+      badge: "",
       guarantee: "Garantía de devolución 100%",
       mostPopular: "Más popular",
       plans: [
@@ -373,7 +373,7 @@ const t = {
       items: [
         { q: "¿Cuánto tarda un proyecto de sitio web?", a: "La mayoría de los proyectos toman 4–8 semanas desde el inicio hasta el lanzamiento. Una landing page simple puede estar lista en 2 semanas, mientras que proyectos más grandes pueden tomar 10–12 semanas." },
         { q: "¿Cuánto cuesta un sitio web?", a: "Un one pager arranca desde $499 y un sitio completo con branding desde $999. Para software a medida o proyectos grandes, lo definimos juntos con precio fijo — sin sorpresas." },
-        { q: "¿Trabajan con clientes fuera del Reino Unido?", a: "¡Claro que sí! Trabajamos con clientes en toda Europa, América del Norte y más allá. Nuestro proceso es 100% remoto." },
+        { q: "¿Trabajan con clientes de cualquier parte del mundo?", a: "¡Claro que sí! Estamos basados en los Países Bajos y trabajamos con clientes en toda Europa, América del Norte y más allá. Nuestro proceso es 100% remoto." },
         { q: "¿Voy a poder actualizar el sitio yo mismo?", a: "Sí. Construimos sobre plataformas CMS como Sanity, Contentful o WordPress para que puedas actualizar contenido sin tocar código." },
         { q: "¿Ofrecen mantenimiento después del lanzamiento?", a: "Sí — ofrecemos planes mensuales que incluyen actualizaciones, monitoreo de performance y soporte prioritario." },
         { q: "¿Qué hace diferente a newww.?", a: "Somos un equipo pequeño y senior. No te van a derivar a juniors ni vas a perder a tu project manager a mitad del proyecto. Nos importa el resultado, no solo la factura." },
@@ -397,7 +397,7 @@ const t = {
       privacy: "Política de privacidad",
       terms: "Términos de servicio",
       copy: (y: number) => `© ${y} newww. Todos los derechos reservados.`,
-      cities: ["Ámsterdam", "Londres", "100% remoto"],
+      cities: ["Ámsterdam", "100% remoto"],
     },
   },
 } as const;
