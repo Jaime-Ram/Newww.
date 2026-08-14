@@ -1,38 +1,24 @@
-import { LanguageProvider } from "@/lib/LanguageContext";
-import CustomCursor from "@/components/CustomCursor";
-import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
-import Marquee from "@/components/Marquee";
-import Work from "@/components/Work";
-import Comparison from "@/components/Comparison";
-import Testimonials from "@/components/Testimonials";
-import Services from "@/components/Services";
-import Process from "@/components/Process";
-import Pricing from "@/components/Pricing";
-import About from "@/components/About";
-import FAQ from "@/components/FAQ";
-import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
+import { Scorebord } from "@/components/Scorebord";
+import { DEFAULT_PLAYERS, DEFAULT_RULES } from "@/lib/defaults";
+import { getState } from "@/lib/store";
+import type { State } from "@/lib/types";
 
-export default function Home() {
-  return (
-    <LanguageProvider>
-      <div data-theme="light">
-        <CustomCursor />
-        <Navigation />
-        <Hero />
-        <Marquee />
-        <Work />
-        <Comparison />
-        <Testimonials />
-        <Services />
-        <Process />
-        <Pricing />
-        <About />
-        <FAQ />
-        <CTA />
-        <Footer />
-      </div>
-    </LanguageProvider>
-  );
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  let initial: State;
+  try {
+    initial = await getState();
+  } catch (err) {
+    // Liever een leeg bord dan een foutpagina; de client haalt zelf opnieuw op.
+    console.error("[page] state laden mislukt", err);
+    initial = {
+      players: DEFAULT_PLAYERS,
+      rules: DEFAULT_RULES,
+      events: [],
+      backend: "memory",
+    };
+  }
+
+  return <Scorebord initial={initial} />;
 }
