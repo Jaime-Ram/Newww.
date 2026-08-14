@@ -1,53 +1,54 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+
 import "./globals.css";
 
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-/** Canonical URL for OG/favicons; production default avoids wrong deployment host in meta. */
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://newww.website");
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
+const titel = "Het Scorebord — Honkbaltoernooi";
+const omschrijving =
+  "Live puntentelling voor het honkbaltoernooi. Iedereen mag punten uitdelen en de regels aanpassen.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Newww. — Web Agency",
-  description:
-    "Newww. is a full-service web agency building websites that win. Design-led development for ambitious brands.",
+  title: titel,
+  description: omschrijving,
+  applicationName: "Het Scorebord",
   openGraph: {
     type: "website",
-    title: "Newww. — Web Agency",
-    description: "We build websites that win.",
-    siteName: "Newww.",
+    title: titel,
+    description: omschrijving,
+    siteName: "Het Scorebord",
+    locale: "nl_NL",
     url: siteUrl,
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Newww.",
-      },
-    ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Newww. — Web Agency",
-    description: "We build websites that win.",
-    images: ["/og.png"],
-  },
+  twitter: { card: "summary_large_image", title: titel, description: omschrijving },
+  appleWebApp: { capable: true, title: "Scorebord", statusBarStyle: "black-translucent" },
+  // Een openbaar scorebord met namen hoeft niet in Google te staan.
+  robots: { index: false, follow: false },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  themeColor: "#0a1210",
+  width: "device-width",
+  initialScale: 1,
+  // Laat de achtergrond doorlopen tot achter de iPhone-homebar.
+  viewportFit: "cover",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={geist.variable}>
+    <html lang="nl" className={geist.variable}>
       <body>{children}</body>
     </html>
   );

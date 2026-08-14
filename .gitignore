@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# lokale opslag als er geen Redis is gekoppeld
+/.data
+
 # vercel
 .vercel
 
