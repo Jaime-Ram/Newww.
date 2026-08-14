@@ -39,5 +39,7 @@ export type State = {
   players: Player[];
   rules: Rule[];
   events: ScoreEvent[];
+  /** Hoogt op bij elke wijziging; hiermee ziet een poll goedkoop of er nieuws is. */
+  rev: number;
   backend: Backend;
 };
