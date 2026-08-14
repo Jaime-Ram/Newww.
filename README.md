@@ -29,14 +29,32 @@ site punten alleen tijdelijk in het geheugen van één server: dan zien niet all
 telefoons hetzelfde en verdwijnt alles bij de volgende deploy. De app laat in
 dat geval zelf een gele waarschuwing zien.
 
-Eenmalig instellen:
+Ga hiervoor **rechtstreeks naar upstash.com**, niet via de Vercel Marketplace.
+Die marketplace-route loopt via Vercel-facturering en toont alleen betaalde
+plannen; bij Upstash zelf is er een permanent gratis plan (256 MB, 500.000
+commando's per maand).
 
-1. Vercel → je project → **Storage** → **Marketplace** → **Upstash for Redis**.
-2. Maak een (gratis) store aan en koppel hem aan dit project.
-3. Vercel zet `KV_REST_API_URL` en `KV_REST_API_TOKEN` er automatisch bij.
+1. Maak een account op [upstash.com](https://upstash.com) → **Redis** →
+   **Create Database**. Kies een regio in Europa.
+2. Scroll op de databasepagina naar **REST API** en kopieer
+   `UPSTASH_REDIS_REST_URL` en `UPSTASH_REDIS_REST_TOKEN`.
+3. Zet die twee in Vercel onder **Settings → Environment Variables**, voor alle
+   omgevingen.
 4. Deploy opnieuw. De gele waarschuwing verdwijnt.
 
-`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` worden ook herkend.
+Maakte je de store tóch via de Vercel Marketplace, dan heten de variabelen
+`KV_REST_API_URL` en `KV_REST_API_TOKEN`; die worden ook herkend.
+
+### Verbruik
+
+Blijft de app onder het gratis quotum? De telefoons vragen elke 5 seconden of er
+iets veranderd is, maar sturen daarbij het versienummer mee dat ze al hebben. Is
+er niets nieuws, dan kost dat één commando in plaats van de vier van een
+volledige uitlezing. Veertien mensen die drie uur lang met het scherm aan staan
+komen zo op ongeveer 30.000 commando's — een toernooidag of tien per maand past
+er dus makkelijk in.
+
+### Gelijktijdig bewerken
 
 Punten worden per stuk weggeschreven (een Redis-hash), dus twee mensen die
 tegelijk scoren overschrijven elkaar niet. Spelers en regels zijn één lijst:
@@ -63,15 +81,17 @@ npm run lint    # eslint
 Next.js 16 (App Router, Turbopack) met React 19 en Tailwind v4. Geen verdere
 dependencies — Redis gaat via de REST API met `fetch`.
 
-| Pad            | Wat het doet                                     |
-| -------------- | ------------------------------------------------ |
-| `/api/state`   | `GET` — spelers, regels en alle punten           |
-| `/api/events`  | `POST` punten geven · `DELETE ?id=` terugdraaien |
-| `/api/players` | `PUT` — spelerslijst opslaan                     |
-| `/api/rules`   | `PUT` — regels opslaan                           |
+| Pad            | Wat het doet                                              |
+| -------------- | --------------------------------------------------------- |
+| `/api/state`   | `GET` — de hele stand, of `?rev=` voor alleen een controle |
+| `/api/events`  | `POST` punten geven · `DELETE ?id=` terugdraaien           |
+| `/api/players` | `PUT` — spelerslijst opslaan                               |
+| `/api/rules`   | `PUT` — regels opslaan                                     |
 
-De browsers halen elke 5 seconden de stand op, dus wat de een invoert staat
-binnen een paar tellen op ieders telefoon.
+De browsers pollen elke 5 seconden, dus wat de een invoert staat binnen een paar
+tellen op ieders telefoon. Bij `?rev=` leest de server eerst het versienummer en
+pas daarna de gegevens — andersom zou een wijziging die net tijdens het lezen
+binnenkomt gemist worden.
 
 Bij het geven van punten bepaalt de server het puntenaantal aan de hand van de
 opgeslagen regel; wat de browser meestuurt wordt genegeerd.

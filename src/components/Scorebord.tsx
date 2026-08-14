@@ -39,11 +39,20 @@ export function Scorebord({ initial }: { initial: State }) {
   const [offline, setOffline] = useState(false);
   const tijdelijk = useRef(0);
 
+  // In een ref, zodat de poll-lus niet opnieuw opgebouwd wordt bij elke wijziging.
+  const revRef = useRef(initial.rev);
+  useEffect(() => {
+    revRef.current = state.rev;
+  }, [state.rev]);
+
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch("/api/state", { cache: "no-store" });
+      // We sturen mee welke versie we al hebben. Is er niets veranderd, dan
+      // antwoordt de server met `unchanged` en kost het maar één Redis-opvraging.
+      const res = await fetch(`/api/state?rev=${revRef.current}`, { cache: "no-store" });
       if (!res.ok) throw new Error();
-      setState((await res.json()) as State);
+      const body = (await res.json()) as State | { unchanged: true };
+      if (!("unchanged" in body)) setState(body);
       setOffline(false);
     } catch {
       setOffline(true);

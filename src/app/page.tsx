@@ -16,6 +16,7 @@ export default async function Page() {
       players: DEFAULT_PLAYERS,
       rules: DEFAULT_RULES,
       events: [],
+      rev: 0,
       backend: "memory",
     };
   }
