@@ -25,7 +25,7 @@ export type ScoreEvent = {
   ts: number;
 };
 
-export type Backend = "redis" | "file" | "memory";
+export type Backend = "postgres" | "redis" | "file" | "memory";
 
 /** Rugnummers los van de vaste namen: playerId → nummer. */
 export type Numbers = Record<string, string>;
