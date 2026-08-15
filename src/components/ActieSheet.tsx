@@ -36,7 +36,7 @@ export function ActieSheet({
             }`}
           >
             <span
-              className={`w-11 shrink-0 text-right text-base font-bold tabular-nums ${
+              className={`w-11 shrink-0 font-display text-right text-lg tabular-nums ${
                 rule.points < 0 ? "text-rood" : rule.points === 0 ? "text-soft" : "text-ink"
               }`}
             >

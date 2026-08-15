@@ -31,7 +31,7 @@ export function Log({
           className={`flex items-center gap-3 px-3 py-2.5 ${i > 0 ? "border-t border-rule" : ""}`}
         >
           <span
-            className={`w-11 shrink-0 text-right font-bold tabular-nums ${
+            className={`w-11 shrink-0 font-display text-right text-lg tabular-nums ${
               event.points < 0 ? "text-rood" : event.points === 0 ? "text-soft" : "text-ink"
             }`}
           >

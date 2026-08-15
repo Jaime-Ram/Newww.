@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo } from "next/font/google";
+import { Anton, Archivo } from "next/font/google";
 
 import "./globals.css";
 
@@ -7,6 +7,13 @@ const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+/** Sportieve blokletter voor de cijfers en de tabs; benadert het woordmerk. */
+const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 const siteUrl =
@@ -45,7 +52,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl" className={archivo.variable}>
+    <html lang="nl" className={`${archivo.variable} ${anton.variable}`}>
       <body>{children}</body>
     </html>
   );

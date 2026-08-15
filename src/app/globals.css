@@ -10,6 +10,7 @@
   --color-rood: #be1e2d;
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-anton), var(--font-archivo), sans-serif;
 }
 
 html {
