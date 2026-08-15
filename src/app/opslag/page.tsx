@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { diagnose } from "@/lib/store";
+import { ROSTER } from "@/lib/roster";
+import { diagnose, versie } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Opslag controleren" };
@@ -25,6 +26,7 @@ const REDIS = [
 
 export default async function OpslagPage() {
   const d = await diagnose();
+  const versieInfo = versie();
   const v = d.variabelen;
 
   const werkt = d.verbinding === "ok";
@@ -44,6 +46,24 @@ export default async function OpslagPage() {
           ? `De database werkt (${d.soort === "postgres" ? "Neon/Postgres" : "Redis"}). Je bent klaar.`
           : "De database is nog niet aangesloten."}
       </p>
+
+      <h2 className="mt-6 font-semibold">Welke versie draait hier</h2>
+      <div className="mt-2 rounded-lg border border-rule bg-paper p-4 text-sm leading-relaxed">
+        <p>
+          Versie <code>{versieInfo.sha}</code>
+          {versieInfo.tak ? (
+            <>
+              {" "}
+              van tak <code>{versieInfo.tak}</code>
+            </>
+          ) : null}
+        </p>
+        {versieInfo.bericht ? <p className="mt-1 text-soft">{versieInfo.bericht}</p> : null}
+        <p className="mt-2">
+          Selectie: <b>{ROSTER.length}</b> namen —{" "}
+          {ROSTER.map((speler) => speler.name).join(", ")}
+        </p>
+      </div>
 
       <h2 className="mt-6 font-semibold">Neon / Postgres</h2>
       <ul className="mt-2 rounded-lg border border-rule bg-paper px-3">

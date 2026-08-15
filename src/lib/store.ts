@@ -205,6 +205,19 @@ export async function diagnose(): Promise<{
   }
 }
 
+/**
+ * Welke versie er draait. Vercel zet deze bij elke deploy klaar; zo is van
+ * buitenaf te zien of de nieuwste code al live staat.
+ */
+export function versie(): { sha: string; bericht: string; tak: string } {
+  const sha = (process.env.VERCEL_GIT_COMMIT_SHA || "").trim();
+  return {
+    sha: sha ? sha.slice(0, 7) : "onbekend",
+    bericht: (process.env.VERCEL_GIT_COMMIT_MESSAGE || "").trim().split("\n")[0],
+    tak: (process.env.VERCEL_GIT_COMMIT_REF || "").trim(),
+  };
+}
+
 /* ── Lezen ─────────────────────────────────────────────────────────────── */
 
 function parseJson<T>(raw: unknown, fallback: T): T {
