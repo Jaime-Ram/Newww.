@@ -1,4 +1,5 @@
-import type { Rule } from "./types";
+import { ROSTER } from "./roster";
+import type { Numbers, Rule } from "./types";
 
 export const MAX_RULES = 60;
 
@@ -48,6 +49,23 @@ export function rules(value: unknown): Rule[] {
     throw new BadRequest("Dubbele actie-ids gevonden");
   }
   return parsed;
+}
+
+export function numbers(value: unknown): Numbers {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new BadRequest("Rugnummers moeten een object zijn");
+  }
+
+  const uit: Numbers = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (!ROSTER.some((p) => p.id === key)) throw new BadRequest("Onbekende speler");
+    const nummer = text(raw, "Rugnummer", 3);
+    // Leeg betekent "geen nummer"; die slaan we niet op.
+    if (!nummer) continue;
+    if (!/^\d{1,3}$/.test(nummer)) throw new BadRequest("Een rugnummer is 1 tot 3 cijfers");
+    uit[key] = nummer;
+  }
+  return uit;
 }
 
 export async function readJson(req: Request): Promise<Record<string, unknown>> {

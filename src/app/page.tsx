@@ -12,7 +12,7 @@ export default async function Page() {
   } catch (err) {
     // Liever een leeg bord dan een foutpagina; de client haalt zelf opnieuw op.
     console.error("[page] state laden mislukt", err);
-    initial = { rules: DEFAULT_RULES, events: [], rev: 0, backend: "memory" };
+    initial = { rules: DEFAULT_RULES, numbers: {}, events: [], rev: 0, backend: "memory" };
   }
 
   return <Scorebord initial={initial} />;

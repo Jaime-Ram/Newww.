@@ -10,7 +10,9 @@ en de acties aanpassen. Er is geen login: de link ís de toegang.
 - **Log** — alles wat is uitgedeeld, nieuwste bovenaan, met een prullenbak per
   regel. Vlak na het scoren kun je ook op "Ongedaan maken" tikken.
 - **Acties** — punten en omschrijvingen aanpassen, acties toevoegen of
-  weghalen. Onderaan staat het wissen van alle punten.
+  weghalen. De lijst staat altijd op punten gesorteerd, hoog naar laag; een
+  nieuwe actie schuift na het opslaan vanzelf op zijn plek. Onderaan staat het
+  wissen van alle punten.
 
 Uitgedeelde punten bewaren hun eigen puntenaantal. Verander je later een actie
 van 25 naar 30, dan blijft die eerdere home run gewoon 25 waard.
@@ -22,6 +24,9 @@ afgesproken; daar staat nu **+3** als plaatshouder.
 
 De namen staan vast in `src/lib/roster.ts`, inclusief wie coach is (die krijgen
 een kroontje). Iemand toevoegen of hernoemen doe je daar, niet in de app.
+
+Rugnummers wél: tik in de stand op het hokje links van een naam en vul het in.
+Die worden in de database bewaard, los van de namen.
 
 ## Opslag instellen (belangrijk)
 
@@ -45,6 +50,12 @@ commando's per maand).
 
 Maakte je de store tóch via de Vercel Marketplace, dan heten de variabelen
 `KV_REST_API_URL` en `KV_REST_API_TOKEN`; die worden ook herkend.
+
+### Een bestaande database hergebruiken
+
+Heb je al een Redis/Upstash-database voor een ander project, dan kun je die
+gewoon delen: alle sleutels van het scorebord beginnen met `hb:`, dus ze botsen
+niet met andere gegevens. Kopieer dezelfde twee variabelen naar dit project.
 
 ### Verbruik
 
@@ -85,7 +96,8 @@ dependencies — Redis gaat via de REST API met `fetch`.
 | ------------- | --------------------------------------------------------- |
 | `/api/state`  | `GET` — acties en punten, of `?rev=` voor alleen een check |
 | `/api/events` | `POST` punten geven · `DELETE ?id=` terugdraaien           |
-| `/api/rules`  | `PUT` — acties opslaan                                     |
+| `/api/rules`  | `PUT` — acties opslaan (gesorteerd terug)                  |
+| `/api/numbers`| `PUT` — rugnummers opslaan                                 |
 
 Bij `?rev=` leest de server eerst het versienummer en pas daarna de gegevens —
 andersom zou een wijziging die net tijdens het lezen binnenkomt gemist worden.

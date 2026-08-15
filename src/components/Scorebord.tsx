@@ -5,10 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { formatSigned, round } from "@/lib/format";
 import { ROSTER } from "@/lib/roster";
-import type { Player, Rule, ScoreEvent, State } from "@/lib/types";
+import type { Numbers, Player, Rule, ScoreEvent, State } from "@/lib/types";
 import { Acties } from "./Acties";
 import { ActieSheet } from "./ActieSheet";
 import { Log } from "./Log";
+import { NummerSheet } from "./NummerSheet";
 import { Stand, type Rij } from "./Stand";
 
 type Tab = "stand" | "log" | "acties";
@@ -36,6 +37,7 @@ export function Scorebord({ initial }: { initial: State }) {
   const [state, setState] = useState<State>(initial);
   const [tab, setTab] = useState<Tab>("stand");
   const [actief, setActief] = useState<Player | null>(null);
+  const [nummerVoor, setNummerVoor] = useState<Player | null>(null);
   const [melding, setMelding] = useState<Melding | null>(null);
   const [busy, setBusy] = useState(false);
   const [offline, setOffline] = useState(false);
@@ -160,6 +162,30 @@ export function Scorebord({ initial }: { initial: State }) {
     }
   }
 
+  async function bewaarNummer(nummer: string) {
+    const speler = nummerVoor;
+    if (!speler) return;
+    setNummerVoor(null);
+
+    const vorige = state.numbers;
+    const volgende: Numbers = { ...vorige };
+    if (nummer) volgende[speler.id] = nummer;
+    else delete volgende[speler.id];
+    setState((s) => ({ ...s, numbers: volgende }));
+
+    try {
+      const res = await fetch("/api/numbers", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numbers: volgende }),
+      });
+      if (!res.ok) throw new Error(foutTekst(await jsonOf(res), "Opslaan mislukt."));
+    } catch (err) {
+      setState((s) => ({ ...s, numbers: vorige }));
+      setMelding({ fout: true, tekst: err instanceof Error ? err.message : "Opslaan mislukt." });
+    }
+  }
+
   async function bewaarActies(rules: Rule[]) {
     setBusy(true);
     try {
@@ -235,7 +261,14 @@ export function Scorebord({ initial }: { initial: State }) {
           </p>
         ) : null}
 
-        {tab === "stand" ? <Stand rijen={rijen} onKies={setActief} /> : null}
+        {tab === "stand" ? (
+          <Stand
+            rijen={rijen}
+            numbers={state.numbers}
+            onKies={setActief}
+            onNummer={setNummerVoor}
+          />
+        ) : null}
         {tab === "log" ? <Log events={state.events} onDelete={verwijderPunt} /> : null}
         {tab === "acties" ? (
           <Acties
@@ -271,6 +304,13 @@ export function Scorebord({ initial }: { initial: State }) {
           </div>
         </div>
       ) : null}
+
+      <NummerSheet
+        player={nummerVoor}
+        huidig={nummerVoor ? (state.numbers[nummerVoor.id] ?? "") : ""}
+        onOpslaan={bewaarNummer}
+        onClose={() => setNummerVoor(null)}
+      />
 
       <ActieSheet
         player={actief}
