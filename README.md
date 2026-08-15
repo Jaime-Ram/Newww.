@@ -35,10 +35,24 @@ site punten alleen tijdelijk in het geheugen van één server: dan zien niet all
 telefoons hetzelfde en verdwijnt alles bij de volgende deploy. De app laat in
 dat geval zelf een waarschuwing zien.
 
-Ga hiervoor **rechtstreeks naar upstash.com**, niet via de Vercel Marketplace.
-Die marketplace-route loopt via Vercel-facturering en toont alleen betaalde
-plannen; bij Upstash zelf is er een permanent gratis plan (256 MB, 500.000
-commando's per maand).
+Er zijn twee smaken; één is genoeg. Staan ze er allebei, dan wint Postgres.
+
+### Neon / Postgres (het snelst als je er al een hebt)
+
+Heb je al een Neon-database in een ander Vercel-project? Ga naar **Storage**,
+open die database en koppel hem ook aan dit project. Vercel zet `DATABASE_URL`
+er dan zelf bij — niets kopiëren. Deploy daarna opnieuw.
+
+De app maakt zijn eigen tabellen aan (`hb_kv`, `hb_events`, `hb_rev`), dus je
+hoeft geen SQL te draaien, en hij zit andere gegevens in die database niet in de
+weg.
+
+### Upstash / Redis
+
+Ga **rechtstreeks naar upstash.com**, niet via de Vercel Marketplace. Die
+marketplace-route loopt via Vercel-facturering en toont alleen betaalde plannen;
+bij Upstash zelf is er een permanent gratis plan (256 MB, 500.000 commando's per
+maand).
 
 1. Maak een account op [upstash.com](https://upstash.com) → **Redis** →
    **Create Database**. Kies een regio in Europa.
@@ -67,9 +81,9 @@ een toernooidag of tien per maand past er dus makkelijk in.
 
 ### Gelijktijdig bewerken
 
-Punten worden per stuk weggeschreven (een Redis-hash), dus twee mensen die
-tegelijk scoren overschrijven elkaar niet. De acties zijn één lijst: slaan twee
-mensen tegelijk op, dan wint de laatste.
+Elk punt is een eigen rij (Postgres) of een eigen veld in een hash (Redis), dus
+twee mensen die tegelijk scoren overschrijven elkaar niet. De acties zijn één
+lijst: slaan twee mensen tegelijk op, dan wint de laatste.
 
 ## Lokaal draaien
 
@@ -78,7 +92,7 @@ npm install
 npm run dev
 ```
 
-Zonder Redis-variabelen bewaart de app lokaal alles in `.data/scorebord.json`
+Zonder database-variabelen bewaart de app lokaal alles in `.data/scorebord.json`
 (niet in git). Verwijder dat bestand om opnieuw met de standaardlijst te
 beginnen.
 
@@ -90,7 +104,7 @@ npm run lint    # eslint
 ## Techniek
 
 Next.js 16 (App Router, Turbopack) met React 19 en Tailwind v4. Geen verdere
-dependencies — Redis gaat via de REST API met `fetch`.
+dependency dan de Neon-driver; Redis gaat via de REST API met `fetch`.
 
 | Pad           | Wat het doet                                              |
 | ------------- | --------------------------------------------------------- |
@@ -104,5 +118,9 @@ andersom zou een wijziging die net tijdens het lezen binnenkomt gemist worden.
 
 Bij het geven van punten bepaalt de server het puntenaantal aan de hand van de
 opgeslagen actie; wat de browser meestuurt wordt genegeerd.
+
+Werkt het niet, open dan **/opslag** op de site: die pagina laat per instelling
+zien of de server hem ziet en geeft één concreet advies. Wachtwoorden komen daar
+nooit in beeld.
 
 Het woordmerk in `public/` is dat van de vereniging.

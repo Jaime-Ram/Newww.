@@ -1,4 +1,15 @@
 import { DEFAULT_RULES } from "./defaults";
+import {
+  pgAddEvent,
+  pgDeleteEvent,
+  pgGetState,
+  pgPing,
+  pgResetEvents,
+  pgRevision,
+  pgSaveNumbers,
+  pgSaveRules,
+  postgresUrl,
+} from "./postgres";
 import type { Backend, Numbers, Rule, ScoreEvent, State } from "./types";
 
 const RULES_KEY = "hb:rules";
@@ -116,6 +127,9 @@ async function writeFileSnapshot(snapshot: Snapshot): Promise<boolean> {
 }
 
 export function activeBackend(): Backend {
+  // Postgres eerst: wie een Neon-database koppelt bedoelt die ook te gebruiken,
+  // ook als er nog oude Redis-variabelen blijven staan.
+  if (postgresUrl()) return "postgres";
   if (redisConfig()) return "redis";
   // Serverless heeft geen schrijfbare projectmap en geen gedeelde instantie:
   // zonder Redis is het daar per definitie wegwerpgeheugen.
@@ -131,45 +145,62 @@ export async function diagnose(): Promise<{
   backend: Backend;
   opVercel: boolean;
   variabelen: Record<string, boolean>;
+  soort: "postgres" | "redis" | "geen";
   verbinding: "ok" | "mislukt" | "niet ingesteld";
   reden?: string;
 }> {
   const namen = [
+    // Neon / Vercel Postgres
+    "DATABASE_URL",
+    "POSTGRES_URL",
+    "DATABASE_URL_UNPOOLED",
+    "POSTGRES_URL_NON_POOLING",
+    // Upstash / Vercel KV
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
     "KV_REST_API_URL",
     "KV_REST_API_TOKEN",
-    // Deze twee werken NIET voor dit project, maar mensen kopiëren ze vaak per
-    // ongeluk; ze zien dat dan hier terug.
+    // Deze werken NIET, maar worden vaak per ongeluk gekopieerd.
     "REDIS_URL",
     "KV_URL",
   ];
-  const variabelen = Object.fromEntries(
-    namen.map((n) => [n, Boolean(process.env[n]?.trim())]),
-  );
+  const variabelen = Object.fromEntries(namen.map((n) => [n, Boolean(process.env[n]?.trim())]));
 
+  const soort = postgresUrl() ? "postgres" : redisConfig() ? "redis" : "geen";
   const basis = {
     backend: activeBackend(),
     opVercel: Boolean(process.env.VERCEL),
     variabelen,
-  };
+    soort,
+  } as const;
 
-  if (!redisConfig()) return { ...basis, verbinding: "niet ingesteld" };
+  if (soort === "geen") return { ...basis, verbinding: "niet ingesteld" };
 
   try {
-    await redis("GET", REV_KEY);
+    if (soort === "postgres") await pgPing();
+    else await redis("GET", REV_KEY);
     return { ...basis, verbinding: "ok" };
   } catch (err) {
-    // Alleen de statuscode teruggeven; het antwoord van de server kan gevoelige
-    // gegevens bevatten.
+    // Nooit de ruwe fout doorgeven: daar kan een wachtwoord in staan.
     const melding = err instanceof Error ? err.message : "";
-    const status = /gaf (\d{3})/.exec(melding)?.[1];
-    const reden =
-      status === "401" || status === "403"
-        ? "Het token wordt niet geaccepteerd. Hoort dit token bij deze database?"
-        : status
-          ? `De database antwoordde met foutcode ${status}.`
-          : "Kon de database niet bereiken. Klopt de URL?";
+    let reden = "Kon de database niet bereiken. Klopt het adres?";
+
+    if (soort === "postgres") {
+      if (/password|authentication/i.test(melding)) {
+        reden = "De database weigert het wachtwoord uit de verbindingsreeks.";
+      } else if (/does not exist|database .* not found/i.test(melding)) {
+        reden = "Die database bestaat niet (meer) onder dat adres.";
+      } else if (/permission|denied/i.test(melding)) {
+        reden = "Deze gebruiker mag geen tabellen aanmaken in die database.";
+      }
+    } else {
+      const status = /gaf (\d{3})/.exec(melding)?.[1];
+      if (status === "401" || status === "403") {
+        reden = "Het token wordt niet geaccepteerd. Hoort dit token bij deze database?";
+      } else if (status) {
+        reden = `De database antwoordde met foutcode ${status}.`;
+      }
+    }
     return { ...basis, verbinding: "mislukt", reden };
   }
 }
@@ -195,7 +226,9 @@ function toNumber(raw: unknown): number {
  * één commando in plaats van de hele stand.
  */
 export async function getRevision(): Promise<number> {
-  if (activeBackend() === "redis") return toNumber(await redis("GET", REV_KEY));
+  const backend = activeBackend();
+  if (backend === "postgres") return pgRevision();
+  if (backend === "redis") return toNumber(await redis("GET", REV_KEY));
   const snapshot = (await readFileSnapshot()) ?? memorySnapshot();
   return snapshot.rev;
 }
@@ -211,6 +244,17 @@ function sortEvents(events: ScoreEvent[]): ScoreEvent[] {
 }
 
 export async function getState(): Promise<State> {
+  if (activeBackend() === "postgres") {
+    const snapshot = await pgGetState();
+    return {
+      rules: sortRules(snapshot.rules),
+      numbers: snapshot.numbers,
+      events: sortEvents(snapshot.events),
+      rev: snapshot.rev,
+      backend: "postgres",
+    };
+  }
+
   if (activeBackend() === "redis") {
     // De revisie wordt vóór de gegevens gelezen. Komt er tijdens het lezen een
     // wijziging binnen, dan hoort daar een hoger nummer bij dan wat wij
@@ -271,6 +315,10 @@ async function writeRedis(command: Command): Promise<void> {
 
 export async function saveRules(input: Rule[]): Promise<Rule[]> {
   const rules = sortRules(input);
+  if (activeBackend() === "postgres") {
+    await pgSaveRules(rules);
+    return rules;
+  }
   if (activeBackend() === "redis") {
     await writeRedis(["SET", RULES_KEY, JSON.stringify(rules)]);
     return rules;
@@ -282,6 +330,7 @@ export async function saveRules(input: Rule[]): Promise<Rule[]> {
 }
 
 export async function saveNumbers(numbers: Numbers): Promise<void> {
+  if (activeBackend() === "postgres") return pgSaveNumbers(numbers);
   if (activeBackend() === "redis") {
     await writeRedis(["SET", NUMBERS_KEY, JSON.stringify(numbers)]);
     return;
@@ -296,6 +345,7 @@ export async function saveNumbers(numbers: Numbers): Promise<void> {
  * schrijven zo naar verschillende velden en overschrijven elkaar niet.
  */
 export async function addEvent(event: ScoreEvent): Promise<void> {
+  if (activeBackend() === "postgres") return pgAddEvent(event);
   if (activeBackend() === "redis") {
     await writeRedis(["HSET", EVENTS_KEY, event.id, JSON.stringify(event)]);
     return;
@@ -306,6 +356,7 @@ export async function addEvent(event: ScoreEvent): Promise<void> {
 }
 
 export async function deleteEvent(id: string): Promise<void> {
+  if (activeBackend() === "postgres") return pgDeleteEvent(id);
   if (activeBackend() === "redis") {
     await writeRedis(["HDEL", EVENTS_KEY, id]);
     return;
@@ -317,6 +368,7 @@ export async function deleteEvent(id: string): Promise<void> {
 
 /** Wist alleen de punten; de acties blijven staan. */
 export async function resetEvents(): Promise<void> {
+  if (activeBackend() === "postgres") return pgResetEvents();
   if (activeBackend() === "redis") {
     await writeRedis(["DEL", EVENTS_KEY]);
     return;
