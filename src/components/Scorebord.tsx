@@ -218,7 +218,7 @@ export function Scorebord({ initial }: { initial: State }) {
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`flex-1 border-b-2 px-3 pb-2.5 text-sm font-semibold ${
+              className={`flex-1 border-b-2 px-3 pb-2.5 font-display text-base tracking-wide ${
                 tab === key ? "border-rood text-paper" : "border-transparent text-paper/60"
               }`}
             >

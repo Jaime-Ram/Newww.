@@ -23,7 +23,7 @@ export function Stand({ rijen, onKies }: { rijen: Rij[]; onKies: (p: Player) => 
             i > 0 ? "border-t border-rule" : ""
           }`}
         >
-          <span className="w-6 shrink-0 text-center text-sm font-semibold text-soft tabular-nums">
+          <span className="w-6 shrink-0 text-center font-display text-base text-soft tabular-nums">
             {rank}
           </span>
 
@@ -42,7 +42,7 @@ export function Stand({ rijen, onKies }: { rijen: Rij[]; onKies: (p: Player) => 
           </span>
 
           <span
-            className={`shrink-0 text-xl font-bold tabular-nums ${
+            className={`shrink-0 font-display text-2xl tabular-nums ${
               total < 0 ? "text-rood" : total === 0 ? "text-soft" : "text-ink"
             }`}
           >
