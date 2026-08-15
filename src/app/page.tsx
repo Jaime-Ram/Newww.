@@ -1,5 +1,5 @@
 import { Scorebord } from "@/components/Scorebord";
-import { DEFAULT_PLAYERS, DEFAULT_RULES } from "@/lib/defaults";
+import { DEFAULT_RULES } from "@/lib/defaults";
 import { getState } from "@/lib/store";
 import type { State } from "@/lib/types";
 
@@ -12,13 +12,7 @@ export default async function Page() {
   } catch (err) {
     // Liever een leeg bord dan een foutpagina; de client haalt zelf opnieuw op.
     console.error("[page] state laden mislukt", err);
-    initial = {
-      players: DEFAULT_PLAYERS,
-      rules: DEFAULT_RULES,
-      events: [],
-      rev: 0,
-      backend: "memory",
-    };
+    initial = { rules: DEFAULT_RULES, events: [], rev: 0, backend: "memory" };
   }
 
   return <Scorebord initial={initial} />;
