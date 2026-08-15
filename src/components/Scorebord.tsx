@@ -256,9 +256,13 @@ export function Scorebord({ initial }: { initial: State }) {
 
       <main className="flex-1 p-4 pb-28">
         {state.backend === "memory" ? (
-          <p className="mb-4 rounded-lg border border-rood bg-paper px-3 py-2.5 text-sm text-ink">
-            Er is nog geen database gekoppeld, dus punten kunnen verdwijnen. Zie de README.
-          </p>
+          <a
+            href="/opslag"
+            className="mb-4 block rounded-lg border border-rood bg-paper px-3 py-2.5 text-sm text-ink"
+          >
+            Er is nog geen database gekoppeld, dus punten kunnen verdwijnen.{" "}
+            <span className="font-semibold underline underline-offset-4">Wat is er mis?</span>
+          </a>
         ) : null}
 
         {tab === "stand" ? (

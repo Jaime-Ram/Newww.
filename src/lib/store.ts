@@ -123,6 +123,57 @@ export function activeBackend(): Backend {
   return globalMemory.__honkbalFileBroken ? "memory" : "file";
 }
 
+/**
+ * Vertelt wat de server wél en niet ziet, zonder ooit een token te tonen.
+ * Bedoeld om te kunnen zien waaróm de opslag niet werkt.
+ */
+export async function diagnose(): Promise<{
+  backend: Backend;
+  opVercel: boolean;
+  variabelen: Record<string, boolean>;
+  verbinding: "ok" | "mislukt" | "niet ingesteld";
+  reden?: string;
+}> {
+  const namen = [
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "KV_REST_API_URL",
+    "KV_REST_API_TOKEN",
+    // Deze twee werken NIET voor dit project, maar mensen kopiëren ze vaak per
+    // ongeluk; ze zien dat dan hier terug.
+    "REDIS_URL",
+    "KV_URL",
+  ];
+  const variabelen = Object.fromEntries(
+    namen.map((n) => [n, Boolean(process.env[n]?.trim())]),
+  );
+
+  const basis = {
+    backend: activeBackend(),
+    opVercel: Boolean(process.env.VERCEL),
+    variabelen,
+  };
+
+  if (!redisConfig()) return { ...basis, verbinding: "niet ingesteld" };
+
+  try {
+    await redis("GET", REV_KEY);
+    return { ...basis, verbinding: "ok" };
+  } catch (err) {
+    // Alleen de statuscode teruggeven; het antwoord van de server kan gevoelige
+    // gegevens bevatten.
+    const melding = err instanceof Error ? err.message : "";
+    const status = /gaf (\d{3})/.exec(melding)?.[1];
+    const reden =
+      status === "401" || status === "403"
+        ? "Het token wordt niet geaccepteerd. Hoort dit token bij deze database?"
+        : status
+          ? `De database antwoordde met foutcode ${status}.`
+          : "Kon de database niet bereiken. Klopt de URL?";
+    return { ...basis, verbinding: "mislukt", reden };
+  }
+}
+
 /* ── Lezen ─────────────────────────────────────────────────────────────── */
 
 function parseJson<T>(raw: unknown, fallback: T): T {
