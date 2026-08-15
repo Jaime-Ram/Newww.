@@ -27,8 +27,12 @@ export type ScoreEvent = {
 
 export type Backend = "redis" | "file" | "memory";
 
+/** Rugnummers los van de vaste namen: playerId → nummer. */
+export type Numbers = Record<string, string>;
+
 export type State = {
   rules: Rule[];
+  numbers: Numbers;
   events: ScoreEvent[];
   /** Hoogt op bij elke wijziging; hiermee ziet een poll goedkoop of er nieuws is. */
   rev: number;

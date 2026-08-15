@@ -1,7 +1,8 @@
 import { DEFAULT_RULES } from "./defaults";
-import type { Backend, Rule, ScoreEvent, State } from "./types";
+import type { Backend, Numbers, Rule, ScoreEvent, State } from "./types";
 
 const RULES_KEY = "hb:rules";
+const NUMBERS_KEY = "hb:numbers";
 const EVENTS_KEY = "hb:events";
 /** Loopt bij elke wijziging één op, zodat een poll met één commando kan zien of er iets veranderd is. */
 const REV_KEY = "hb:rev";
@@ -69,12 +70,12 @@ async function redisPipeline(...commands: Command[]): Promise<unknown[]> {
    schijf niet schrijfbaar is op puur geheugen. Geheugen overleeft geen
    serverless deploy — de UI waarschuwt daar zichtbaar voor.                */
 
-type Snapshot = { rules: Rule[]; events: ScoreEvent[]; rev: number };
+type Snapshot = { rules: Rule[]; numbers: Numbers; events: ScoreEvent[]; rev: number };
 
 const FILE_PATH = "./.data/scorebord.json";
 
 function emptySnapshot(): Snapshot {
-  return { rules: structuredClone(DEFAULT_RULES), events: [], rev: 0 };
+  return { rules: sortRules(structuredClone(DEFAULT_RULES)), numbers: {}, events: [], rev: 0 };
 }
 
 const globalMemory = globalThis as unknown as {
@@ -92,7 +93,7 @@ async function readFileSnapshot(): Promise<Snapshot | null> {
   try {
     const { readFile } = await import("node:fs/promises");
     const parsed = JSON.parse(await readFile(FILE_PATH, "utf8")) as Snapshot;
-    return { ...parsed, rev: parsed.rev ?? 0 };
+    return { ...parsed, numbers: parsed.numbers ?? {}, rev: parsed.rev ?? 0 };
   } catch (err) {
     if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return emptySnapshot();
     globalMemory.__honkbalFileBroken = true;
@@ -148,6 +149,11 @@ export async function getRevision(): Promise<number> {
   return snapshot.rev;
 }
 
+/** Acties staan altijd hoog naar laag; gelijk aantal punten op alfabet. */
+function sortRules(rules: Rule[]): Rule[] {
+  return [...rules].sort((a, b) => b.points - a.points || a.label.localeCompare(b.label, "nl"));
+}
+
 /** Nieuwste eerst — het log leest van boven naar beneden. */
 function sortEvents(events: ScoreEvent[]): ScoreEvent[] {
   return [...events].sort((a, b) => b.ts - a.ts);
@@ -159,9 +165,10 @@ export async function getState(): Promise<State> {
     // wijziging binnen, dan hoort daar een hoger nummer bij dan wat wij
     // teruggeven en haalt de volgende poll hem alsnog op. Andersom zou een
     // wijziging juist gemist worden.
-    const [revRaw, rulesRaw, eventsRaw] = await redisPipeline(
+    const [revRaw, rulesRaw, numbersRaw, eventsRaw] = await redisPipeline(
       ["GET", REV_KEY],
       ["GET", RULES_KEY],
+      ["GET", NUMBERS_KEY],
       ["HVALS", EVENTS_KEY],
     );
 
@@ -172,7 +179,8 @@ export async function getState(): Promise<State> {
       : [];
 
     return {
-      rules: parseJson(rulesRaw, structuredClone(DEFAULT_RULES)),
+      rules: sortRules(parseJson(rulesRaw, DEFAULT_RULES)),
+      numbers: parseJson<Numbers>(numbersRaw, {}),
       events: sortEvents(events),
       rev: toNumber(revRaw),
       backend: "redis",
@@ -181,7 +189,8 @@ export async function getState(): Promise<State> {
 
   const snapshot = (await readFileSnapshot()) ?? memorySnapshot();
   return {
-    rules: snapshot.rules,
+    rules: sortRules(snapshot.rules),
+    numbers: snapshot.numbers,
     events: sortEvents(snapshot.events),
     rev: snapshot.rev,
     backend: activeBackend(),
@@ -209,13 +218,25 @@ async function writeRedis(command: Command): Promise<void> {
   await redisPipeline(command, ["INCR", REV_KEY]);
 }
 
-export async function saveRules(rules: Rule[]): Promise<void> {
+export async function saveRules(input: Rule[]): Promise<Rule[]> {
+  const rules = sortRules(input);
   if (activeBackend() === "redis") {
     await writeRedis(["SET", RULES_KEY, JSON.stringify(rules)]);
-    return;
+    return rules;
   }
   await mutateLocal((s) => {
     s.rules = rules;
+  });
+  return rules;
+}
+
+export async function saveNumbers(numbers: Numbers): Promise<void> {
+  if (activeBackend() === "redis") {
+    await writeRedis(["SET", NUMBERS_KEY, JSON.stringify(numbers)]);
+    return;
+  }
+  await mutateLocal((s) => {
+    s.numbers = numbers;
   });
 }
 
