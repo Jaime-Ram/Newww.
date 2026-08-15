@@ -14,6 +14,7 @@ export const ROSTER: Player[] = [
   { id: "tristan", name: "Tristan", rol: "speler" },
   { id: "hein", name: "Hein", rol: "speler" },
   { id: "ronald", name: "Ronald", rol: "speler" },
+  { id: "oscar", name: "Oscar", rol: "speler" },
 ];
 
 export const ROL_LABEL: Record<Player["rol"], string> = {
