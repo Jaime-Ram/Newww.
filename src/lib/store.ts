@@ -1,25 +1,24 @@
-import { DEFAULT_PLAYERS, DEFAULT_RULES } from "./defaults";
-import type { Backend, Player, Rule, ScoreEvent, State } from "./types";
+import { DEFAULT_RULES } from "./defaults";
+import type { Backend, Rule, ScoreEvent, State } from "./types";
 
-const PLAYERS_KEY = "hb:players";
 const RULES_KEY = "hb:rules";
 const EVENTS_KEY = "hb:events";
 /** Loopt bij elke wijziging één op, zodat een poll met één commando kan zien of er iets veranderd is. */
 const REV_KEY = "hb:rev";
 
 /**
- * Vercel KV en Upstash zetten hun REST-credentials onder verschillende namen neer,
- * afhankelijk van hoe de store is aangemaakt. We accepteren ze allebei.
+ * Upstash en Vercel KV zetten hun REST-credentials onder verschillende namen
+ * neer, afhankelijk van hoe de store is aangemaakt. We accepteren ze allebei.
  */
 function redisConfig() {
   const url = (
-    process.env.KV_REST_API_URL ||
     process.env.UPSTASH_REDIS_REST_URL ||
+    process.env.KV_REST_API_URL ||
     ""
   ).trim();
   const token = (
-    process.env.KV_REST_API_TOKEN ||
     process.env.UPSTASH_REDIS_REST_TOKEN ||
+    process.env.KV_REST_API_TOKEN ||
     ""
   ).trim();
   return url && token ? { url: url.replace(/\/$/, ""), token } : null;
@@ -70,17 +69,12 @@ async function redisPipeline(...commands: Command[]): Promise<unknown[]> {
    schijf niet schrijfbaar is op puur geheugen. Geheugen overleeft geen
    serverless deploy — de UI waarschuwt daar zichtbaar voor.                */
 
-type Snapshot = { players: Player[]; rules: Rule[]; events: ScoreEvent[]; rev: number };
+type Snapshot = { rules: Rule[]; events: ScoreEvent[]; rev: number };
 
 const FILE_PATH = "./.data/scorebord.json";
 
 function emptySnapshot(): Snapshot {
-  return {
-    players: structuredClone(DEFAULT_PLAYERS),
-    rules: structuredClone(DEFAULT_RULES),
-    events: [],
-    rev: 0,
-  };
+  return { rules: structuredClone(DEFAULT_RULES), events: [], rev: 0 };
 }
 
 const globalMemory = globalThis as unknown as {
@@ -97,9 +91,7 @@ async function readFileSnapshot(): Promise<Snapshot | null> {
   if (globalMemory.__honkbalFileBroken) return null;
   try {
     const { readFile } = await import("node:fs/promises");
-    const raw = await readFile(FILE_PATH, "utf8");
-    const parsed = JSON.parse(raw) as Snapshot;
-    // Bestanden van vóór de revisieteller hebben nog geen `rev`.
+    const parsed = JSON.parse(await readFile(FILE_PATH, "utf8")) as Snapshot;
     return { ...parsed, rev: parsed.rev ?? 0 };
   } catch (err) {
     if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return emptySnapshot();
@@ -151,9 +143,14 @@ function toNumber(raw: unknown): number {
  * één commando in plaats van de hele stand.
  */
 export async function getRevision(): Promise<number> {
-  if (activeBackend() === "redis") return toNumber(await redis(`GET`, REV_KEY));
+  if (activeBackend() === "redis") return toNumber(await redis("GET", REV_KEY));
   const snapshot = (await readFileSnapshot()) ?? memorySnapshot();
   return snapshot.rev;
+}
+
+/** Nieuwste eerst — het log leest van boven naar beneden. */
+function sortEvents(events: ScoreEvent[]): ScoreEvent[] {
+  return [...events].sort((a, b) => b.ts - a.ts);
 }
 
 export async function getState(): Promise<State> {
@@ -162,9 +159,8 @@ export async function getState(): Promise<State> {
     // wijziging binnen, dan hoort daar een hoger nummer bij dan wat wij
     // teruggeven en haalt de volgende poll hem alsnog op. Andersom zou een
     // wijziging juist gemist worden.
-    const [revRaw, playersRaw, rulesRaw, eventsRaw] = await redisPipeline(
+    const [revRaw, rulesRaw, eventsRaw] = await redisPipeline(
       ["GET", REV_KEY],
-      ["GET", PLAYERS_KEY],
       ["GET", RULES_KEY],
       ["HVALS", EVENTS_KEY],
     );
@@ -176,7 +172,6 @@ export async function getState(): Promise<State> {
       : [];
 
     return {
-      players: parseJson(playersRaw, structuredClone(DEFAULT_PLAYERS)),
       rules: parseJson(rulesRaw, structuredClone(DEFAULT_RULES)),
       events: sortEvents(events),
       rev: toNumber(revRaw),
@@ -186,17 +181,11 @@ export async function getState(): Promise<State> {
 
   const snapshot = (await readFileSnapshot()) ?? memorySnapshot();
   return {
-    players: snapshot.players,
     rules: snapshot.rules,
     events: sortEvents(snapshot.events),
     rev: snapshot.rev,
     backend: activeBackend(),
   };
-}
-
-/** Nieuwste eerst — de feed leest van boven naar beneden. */
-function sortEvents(events: ScoreEvent[]): ScoreEvent[] {
-  return [...events].sort((a, b) => b.ts - a.ts);
 }
 
 /* ── Schrijven ─────────────────────────────────────────────────────────── */
@@ -218,16 +207,6 @@ async function mutateLocal(fn: (snapshot: Snapshot) => void): Promise<void> {
 /** Schrijft en hoogt de revisie op in één aanvraag. */
 async function writeRedis(command: Command): Promise<void> {
   await redisPipeline(command, ["INCR", REV_KEY]);
-}
-
-export async function savePlayers(players: Player[]): Promise<void> {
-  if (activeBackend() === "redis") {
-    await writeRedis(["SET", PLAYERS_KEY, JSON.stringify(players)]);
-    return;
-  }
-  await mutateLocal((s) => {
-    s.players = players;
-  });
 }
 
 export async function saveRules(rules: Rule[]): Promise<void> {
@@ -264,7 +243,7 @@ export async function deleteEvent(id: string): Promise<void> {
   });
 }
 
-/** Wist alleen de punten; spelers en regels blijven staan. */
+/** Wist alleen de punten; de acties blijven staan. */
 export async function resetEvents(): Promise<void> {
   if (activeBackend() === "redis") {
     await writeRedis(["DEL", EVENTS_KEY]);

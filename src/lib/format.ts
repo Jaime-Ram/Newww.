@@ -9,35 +9,21 @@ export function formatPoints(value: number): string {
   return nl.format(round(value));
 }
 
-/** Met expliciet plusteken — voor de feed en de puntenbadges bij de regels. */
+/** Met expliciet plusteken — voor het log en de puntenbadges bij de acties. */
 export function formatSigned(value: number): string {
   const rounded = round(value);
   return rounded > 0 ? `+${nl.format(rounded)}` : nl.format(rounded);
 }
 
-const time = new Intl.DateTimeFormat("nl-NL", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const time = new Intl.DateTimeFormat("nl-NL", { hour: "2-digit", minute: "2-digit" });
 
 export function formatWhen(ts: number, now: number): string {
   const seconds = Math.round((now - ts) / 1000);
   if (seconds < 45) return "net";
-  if (seconds < 3600) return `${Math.round(seconds / 60)} min geleden`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
   const date = new Date(ts);
   const sameDay = new Date(now).toDateString() === date.toDateString();
-  return sameDay ? time.format(date) : `${date.getDate()}/${date.getMonth() + 1} ${time.format(date)}`;
-}
-
-/** "+1 punt" / "+25 punten" — met het juiste enkel- of meervoud. */
-export function pointsLabel(value: number): string {
-  const rounded = round(value);
-  return `${formatSigned(rounded)} ${Math.abs(rounded) === 1 ? "punt" : "punten"}`;
-}
-
-/** "+1 punt per inning" — leest natuurlijker dan een kale badge in de regellijst. */
-export function describeRule(points: number, unit?: string): string {
-  return unit ? `${pointsLabel(points)} per ${unit}` : pointsLabel(points);
+  return sameDay ? time.format(date) : `${date.getDate()}/${date.getMonth() + 1}`;
 }
 
 /** Zet Nederlandse invoer met een komma om naar een getal ("0,2" → 0.2). */

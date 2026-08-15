@@ -1,21 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { formatPoints, formatSigned, round } from "@/lib/format";
+import { formatSigned, round } from "@/lib/format";
+import { ROSTER } from "@/lib/roster";
 import type { Player, Rule, ScoreEvent, State } from "@/lib/types";
-import { Beheer } from "./Beheer";
-import { Feed } from "./Feed";
-import { PuntenSheet, type ScorePayload } from "./PuntenSheet";
-import { Ranglijst, type Standing } from "./Ranglijst";
+import { Acties } from "./Acties";
+import { ActieSheet } from "./ActieSheet";
+import { Log } from "./Log";
+import { Stand, type Rij } from "./Stand";
 
-type Tab = "ranglijst" | "feed" | "beheer";
-type Toast = { tone: "ok" | "fout"; text: string; onUndo?: () => void };
+type Tab = "stand" | "log" | "acties";
+type Melding = { fout?: boolean; tekst: string; onUndo?: () => void };
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "ranglijst", label: "Ranglijst" },
-  { key: "feed", label: "Feed" },
-  { key: "beheer", label: "Beheer" },
+  { key: "stand", label: "Stand" },
+  { key: "log", label: "Log" },
+  { key: "acties", label: "Acties" },
 ];
 
 async function jsonOf(res: Response): Promise<Record<string, unknown>> {
@@ -26,15 +28,15 @@ async function jsonOf(res: Response): Promise<Record<string, unknown>> {
   }
 }
 
-function errorText(body: Record<string, unknown>, fallback: string) {
+function foutTekst(body: Record<string, unknown>, fallback: string) {
   return typeof body.error === "string" ? body.error : fallback;
 }
 
 export function Scorebord({ initial }: { initial: State }) {
   const [state, setState] = useState<State>(initial);
-  const [tab, setTab] = useState<Tab>("ranglijst");
+  const [tab, setTab] = useState<Tab>("stand");
   const [actief, setActief] = useState<Player | null>(null);
-  const [toast, setToast] = useState<Toast | null>(null);
+  const [melding, setMelding] = useState<Melding | null>(null);
   const [busy, setBusy] = useState(false);
   const [offline, setOffline] = useState(false);
   const tijdelijk = useRef(0);
@@ -59,82 +61,80 @@ export function Scorebord({ initial }: { initial: State }) {
     }
   }, []);
 
-  // Meelezen met de telefoons van de rest. Staat iemand in Beheer te typen,
+  // Meelezen met de telefoons van de rest. Staat iemand bij Acties te typen,
   // dan pauzeren we, zodat een binnenkomende update zijn invoer niet overschrijft.
   useEffect(() => {
-    if (tab === "beheer") return;
-    const tick = () => {
+    if (tab === "acties") return;
+    const tik = () => {
       if (document.visibilityState === "visible") void refresh();
     };
-    const timer = setInterval(tick, 5000);
-    document.addEventListener("visibilitychange", tick);
+    const timer = setInterval(tik, 5000);
+    document.addEventListener("visibilitychange", tik);
     return () => {
       clearInterval(timer);
-      document.removeEventListener("visibilitychange", tick);
+      document.removeEventListener("visibilitychange", tik);
     };
   }, [tab, refresh]);
 
   useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 6000);
+    if (!melding) return;
+    const timer = setTimeout(() => setMelding(null), 6000);
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [melding]);
 
-  const standings = useMemo<Standing[]>(() => {
+  const rijen = useMemo<Rij[]>(() => {
     const totalen = new Map<string, { total: number; count: number }>();
     for (const event of state.events) {
       const vorige = totalen.get(event.playerId) ?? { total: 0, count: 0 };
       totalen.set(event.playerId, {
-        total: vorige.total + event.points * event.qty,
+        total: vorige.total + event.points,
         count: vorige.count + 1,
       });
     }
 
-    const rijen = state.players
-      .map((player) => {
-        const cel = totalen.get(player.id);
-        return { player, total: round(cel?.total ?? 0), count: cel?.count ?? 0 };
-      })
-      .sort((a, b) => b.total - a.total || a.player.name.localeCompare(b.player.name, "nl"));
+    const gesorteerd = ROSTER.map((player) => {
+      const cel = totalen.get(player.id);
+      return { player, total: round(cel?.total ?? 0), count: cel?.count ?? 0 };
+    }).sort((a, b) => b.total - a.total || a.player.name.localeCompare(b.player.name, "nl"));
 
     // Gelijke stand = gedeelde plek (1, 2, 2, 4).
-    const uitslag: Standing[] = [];
-    for (const [index, rij] of rijen.entries()) {
+    const uitslag: Rij[] = [];
+    for (const [index, rij] of gesorteerd.entries()) {
       const vorige = uitslag[index - 1];
       const rank = vorige && vorige.total === rij.total ? vorige.rank : index + 1;
       uitslag.push({ ...rij, rank });
     }
     return uitslag;
-  }, [state.events, state.players]);
-
-  const koploper = standings.find((s) => s.count > 0 && s.rank === 1) ?? null;
+  }, [state.events]);
 
   const verwijderPunt = useCallback(
     async (id: string) => {
-      setToast(null);
+      setMelding(null);
       setState((s) => ({ ...s, events: s.events.filter((e) => e.id !== id) }));
       try {
         const res = await fetch(`/api/events?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
       } catch {
-        setToast({ tone: "fout", text: "Verwijderen mislukt." });
+        setMelding({ fout: true, tekst: "Verwijderen mislukt." });
         void refresh();
       }
     },
     [refresh],
   );
 
-  async function score(payload: ScorePayload) {
-    const speler = state.players.find((p) => p.id === payload.playerId);
+  async function score(ruleId: string) {
+    const speler = actief;
+    const rule = state.rules.find((r) => r.id === ruleId);
+    if (!speler || !rule) return;
+    setActief(null);
+
     const tempId = `temp-${++tijdelijk.current}`;
     const optimistisch: ScoreEvent = {
       id: tempId,
-      playerId: payload.playerId,
-      ruleId: payload.ruleId,
-      label: payload.label,
-      points: payload.points,
-      qty: payload.qty,
-      ...(payload.note ? { note: payload.note } : {}),
+      playerId: speler.id,
+      ruleId,
+      label: rule.label,
+      points: rule.points,
       ts: Date.now(),
     };
     setState((s) => ({ ...s, events: [optimistisch, ...s.events] }));
@@ -143,197 +143,128 @@ export function Scorebord({ initial }: { initial: State }) {
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          playerId: payload.playerId,
-          ruleId: payload.ruleId,
-          label: payload.label,
-          points: payload.points,
-          qty: payload.qty,
-          note: payload.note,
-        }),
+        body: JSON.stringify({ playerId: speler.id, ruleId }),
       });
       const body = await jsonOf(res);
-      if (!res.ok) throw new Error(errorText(body, "Opslaan mislukt."));
+      if (!res.ok) throw new Error(foutTekst(body, "Opslaan mislukt."));
 
       const bewaard = body.event as ScoreEvent;
-      setState((s) => ({
-        ...s,
-        events: s.events.map((e) => (e.id === tempId ? bewaard : e)),
-      }));
-      setToast({
-        tone: "ok",
-        text: `${formatSigned(bewaard.points * bewaard.qty)} voor ${speler?.name ?? "speler"}`,
+      setState((s) => ({ ...s, events: s.events.map((e) => (e.id === tempId ? bewaard : e)) }));
+      setMelding({
+        tekst: `${formatSigned(bewaard.points)} voor ${speler.name}`,
         onUndo: () => void verwijderPunt(bewaard.id),
       });
     } catch (err) {
       setState((s) => ({ ...s, events: s.events.filter((e) => e.id !== tempId) }));
-      setToast({ tone: "fout", text: err instanceof Error ? err.message : "Opslaan mislukt." });
+      setMelding({ fout: true, tekst: err instanceof Error ? err.message : "Opslaan mislukt." });
     }
   }
 
-  async function bewaar(pad: "players" | "rules", body: object, succes: string) {
+  async function bewaarActies(rules: Rule[]) {
     setBusy(true);
     try {
-      const res = await fetch(`/api/${pad}`, {
+      const res = await fetch("/api/rules", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ rules }),
       });
       const data = await jsonOf(res);
-      if (!res.ok) throw new Error(errorText(data, "Opslaan mislukt."));
-      setState((s) => ({ ...s, ...data }));
-      setToast({ tone: "ok", text: succes });
+      if (!res.ok) throw new Error(foutTekst(data, "Opslaan mislukt."));
+      setState((s) => ({ ...s, rules: data.rules as Rule[] }));
+      setMelding({ tekst: "Acties opgeslagen." });
       return true;
     } catch (err) {
-      setToast({ tone: "fout", text: err instanceof Error ? err.message : "Opslaan mislukt." });
+      setMelding({ fout: true, tekst: err instanceof Error ? err.message : "Opslaan mislukt." });
       return false;
     } finally {
       setBusy(false);
     }
   }
 
-  async function resetPunten() {
-    if (!window.confirm("Alle uitgedeelde punten wissen? Dit kan niet ongedaan gemaakt worden.")) {
-      return;
-    }
+  async function wisPunten() {
+    if (!window.confirm("Alle punten wissen? Dit kan niet ongedaan gemaakt worden.")) return;
     setBusy(true);
     try {
       const res = await fetch("/api/events?id=all", { method: "DELETE" });
       if (!res.ok) throw new Error();
       setState((s) => ({ ...s, events: [] }));
-      setToast({ tone: "ok", text: "Alle punten gewist." });
+      setMelding({ tekst: "Alle punten gewist." });
     } catch {
-      setToast({ tone: "fout", text: "Wissen mislukt." });
+      setMelding({ fout: true, tekst: "Wissen mislukt." });
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col">
-      <header className="sticky top-0 z-30 border-b border-line bg-night/90 backdrop-blur-md">
-        <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-bold tracking-[0.18em] text-clay uppercase">
-              Honkbaltoernooi
-            </p>
-            <h1 className="text-xl leading-tight font-extrabold tracking-tight">Het Scorebord</h1>
-          </div>
-          <span
-            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${
-              offline
-                ? "border-clay/40 bg-clay/10 text-clay"
-                : "border-grass/30 bg-grass/10 text-grass"
-            }`}
-          >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${offline ? "bg-clay" : "animate-pulse bg-grass"}`}
-            />
-            {offline ? "offline" : "live"}
+    <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col">
+      <header className="sticky top-0 z-30 bg-ink">
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <Image
+            src="/kinheim-wordmark.png"
+            alt="Kinheim"
+            width={708}
+            height={330}
+            priority
+            className="h-8 w-auto"
+          />
+          <span className="text-sm font-semibold text-paper">
+            {offline ? "geen verbinding" : "Scorebord"}
           </span>
         </div>
 
-        <div className="flex gap-1 px-2 pb-2">
+        <div className="flex">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
-                tab === key ? "bg-raised text-cream" : "text-muted hover:text-cream"
+              className={`flex-1 border-b-2 px-3 pb-2.5 text-sm font-semibold ${
+                tab === key ? "border-rood text-paper" : "border-transparent text-paper/60"
               }`}
             >
               {label}
-              {key === "feed" && state.events.length > 0 ? (
-                <span className="ml-1.5 text-xs font-semibold text-muted tabular-nums">
-                  {state.events.length}
-                </span>
-              ) : null}
             </button>
           ))}
         </div>
       </header>
 
-      <main className="flex-1 px-4 pt-4 pb-32">
+      <main className="flex-1 p-4 pb-28">
         {state.backend === "memory" ? (
-          <p className="mb-4 rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-xs leading-relaxed text-gold">
-            <span className="font-bold">Nog geen database gekoppeld.</span> De punten worden nu
-            alleen tijdelijk bewaard en kunnen elk moment verdwijnen. Koppel een Redis-store in
-            Vercel (zie de README) om ze echt vast te leggen.
+          <p className="mb-4 rounded-lg border border-rood bg-paper px-3 py-2.5 text-sm text-ink">
+            Er is nog geen database gekoppeld, dus punten kunnen verdwijnen. Zie de README.
           </p>
         ) : null}
 
-        {tab === "ranglijst" ? (
-          <div className="hb-rise space-y-4">
-            {koploper ? (
-              <div className="flex items-center gap-4 rounded-2xl border border-line bg-gradient-to-br from-panel to-night px-4 py-4">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
-                    Aan kop
-                  </p>
-                  <p className="truncate text-2xl font-extrabold tracking-tight">
-                    {koploper.player.name}
-                  </p>
-                </div>
-                <p className="shrink-0 text-4xl font-extrabold text-gold tabular-nums">
-                  {formatPoints(koploper.total)}
-                </p>
-              </div>
-            ) : (
-              <p className="rounded-2xl border border-line bg-panel px-4 py-4 text-sm text-muted">
-                Tik een speler aan om punten uit te delen.
-              </p>
-            )}
-
-            <Ranglijst standings={standings} onPick={setActief} />
-          </div>
-        ) : null}
-
-        {tab === "feed" ? (
-          <div className="hb-rise">
-            <Feed events={state.events} players={state.players} onDelete={verwijderPunt} />
-          </div>
-        ) : null}
-
-        {tab === "beheer" ? (
-          <div className="hb-rise">
-            <Beheer
-              players={state.players}
-              rules={state.rules}
-              busy={busy}
-              onSavePlayers={(players: Player[]) =>
-                bewaar("players", { players }, "Spelers opgeslagen.")
-              }
-              onSaveRules={(rules: Rule[]) => bewaar("rules", { rules }, "Regels opgeslagen.")}
-              onResetPunten={resetPunten}
-            />
-          </div>
+        {tab === "stand" ? <Stand rijen={rijen} onKies={setActief} /> : null}
+        {tab === "log" ? <Log events={state.events} onDelete={verwijderPunt} /> : null}
+        {tab === "acties" ? (
+          <Acties
+            rules={state.rules}
+            onSave={bewaarActies}
+            onWisPunten={wisPunten}
+            busy={busy}
+          />
         ) : null}
       </main>
 
-      {toast ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+      {melding ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div
             role="status"
-            className={`hb-rise pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border px-4 py-3 shadow-xl ${
-              toast.tone === "ok"
-                ? "border-line bg-raised text-cream"
-                : "border-clay/50 bg-clay/15 text-cream"
+            className={`pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-lg px-4 py-3 shadow-lg ${
+              melding.fout ? "bg-rood text-white" : "bg-ink text-paper"
             }`}
           >
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{toast.text}</span>
-            {toast.onUndo ? (
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{melding.tekst}</span>
+            {melding.onUndo ? (
               <button
-                onClick={toast.onUndo}
-                className="shrink-0 text-sm font-bold text-clay underline underline-offset-2"
+                onClick={melding.onUndo}
+                className="shrink-0 text-sm font-bold underline underline-offset-2"
               >
                 Ongedaan maken
               </button>
             ) : (
-              <button
-                onClick={() => setToast(null)}
-                aria-label="Melding sluiten"
-                className="shrink-0 text-muted"
-              >
+              <button onClick={() => setMelding(null)} aria-label="Sluiten" className="shrink-0">
                 ✕
               </button>
             )}
@@ -341,11 +272,11 @@ export function Scorebord({ initial }: { initial: State }) {
         </div>
       ) : null}
 
-      <PuntenSheet
+      <ActieSheet
         player={actief}
         rules={state.rules}
-        total={standings.find((s) => s.player.id === actief?.id)?.total ?? 0}
-        onScore={(payload) => void score(payload)}
+        total={rijen.find((r) => r.player.id === actief?.id)?.total ?? 0}
+        onScore={score}
         onClose={() => setActief(null)}
       />
     </div>

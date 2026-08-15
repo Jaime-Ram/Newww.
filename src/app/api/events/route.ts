@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { ROSTER } from "@/lib/roster";
 import { addEvent, deleteEvent, getState, resetEvents } from "@/lib/store";
 import type { ScoreEvent } from "@/lib/types";
 import * as v from "@/lib/validate";
@@ -18,42 +19,25 @@ function fail(err: unknown) {
 export async function POST(req: NextRequest) {
   try {
     const body = await v.readJson(req);
-    const state = await getState();
 
     const playerId = v.id(body.playerId, "Speler");
-    if (!state.players.some((p) => p.id === playerId)) {
-      throw new v.BadRequest("Deze speler bestaat niet (meer).");
+    if (!ROSTER.some((p) => p.id === playerId)) {
+      throw new v.BadRequest("Deze speler staat niet in de selectie.");
     }
 
-    const quantity = v.qty(body.qty);
-    const note = v.text(body.note ?? "", "Notitie", 140);
-
-    // Regelpunten komen van de server, zodat de feed niet te vervalsen is
+    // Naam en punten komen van de server, zodat het log niet te vervalsen is
     // met een afwijkend puntenaantal in de aanvraag.
-    let ruleId: string | null = null;
-    let label: string;
-    let points: number;
-
-    if (body.ruleId == null || body.ruleId === "") {
-      label = v.text(body.label, "Omschrijving", 120);
-      if (!label) throw new v.BadRequest("Geef een omschrijving voor de losse punten.");
-      points = v.points(body.points, "Punten");
-    } else {
-      ruleId = v.id(body.ruleId, "Regel");
-      const rule = state.rules.find((r) => r.id === ruleId);
-      if (!rule) throw new v.BadRequest("Deze regel bestaat niet (meer).");
-      label = rule.label;
-      points = rule.points;
-    }
+    const ruleId = v.id(body.ruleId, "Actie");
+    const { rules } = await getState();
+    const rule = rules.find((r) => r.id === ruleId);
+    if (!rule) throw new v.BadRequest("Deze actie bestaat niet meer.");
 
     const event: ScoreEvent = {
       id: crypto.randomUUID(),
       playerId,
       ruleId,
-      label,
-      points,
-      qty: quantity,
-      ...(note ? { note } : {}),
+      label: rule.label,
+      points: rule.points,
       ts: Date.now(),
     };
 

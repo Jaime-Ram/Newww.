@@ -1,9 +1,15 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
 export default function AppleIcon() {
+  const mark = readFileSync(join(process.cwd(), "public", "kinheim-wordmark.png"));
+  const src = `data:image/png;base64,${mark.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -13,19 +19,11 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0a1210",
+          background: "#111111",
+          padding: 18,
         }}
       >
-        <svg width="140" height="140" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="25" fill="#f2efe4" />
-          <path
-            d="M14 15c7 8 7 26 0 34M50 15c-7 8-7 26 0 34"
-            stroke="#e4572e"
-            strokeWidth="4"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </svg>
+        <img src={src} style={{ width: "100%", objectFit: "contain" }} alt="" />
       </div>
     ),
     size,
